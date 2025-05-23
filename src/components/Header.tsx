@@ -1,5 +1,7 @@
 
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -7,11 +9,20 @@ interface HeaderProps {
 
 export const Header = ({ toggleSidebar }: HeaderProps) => {
   const { toast } = useToast();
+  const { user, logout, isAdmin } = useAuth();
   
   const handleNotificationClick = () => {
     toast({
       title: "Notificações",
       description: "Você tem 3 novas notificações",
+    });
+  };
+
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logout realizado",
+      description: "Você foi desconectado com sucesso",
     });
   };
 
@@ -45,13 +56,34 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
               <span className="notification-dot"></span>
             </button>
           </div>
-          <div className="flex items-center">
-            <img 
-              src="https://ui-avatars.com/api/?name=João+Silva&background=3b82f6&color=fff" 
-              alt="Profile" 
-              className="h-8 w-8 rounded-full"
-            />
-            <span className="ml-2 font-medium hidden sm:block">João Silva</span>
+          
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center">
+              <img 
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.nome || '')}&background=3b82f6&color=fff`} 
+                alt="Profile" 
+                className="h-8 w-8 rounded-full"
+              />
+              <div className="ml-2 hidden sm:block">
+                <span className="font-medium text-sm">{user?.nome}</span>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    isAdmin ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {isAdmin ? 'Admin' : 'Instrutor'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleLogout}
+              className="text-xs"
+            >
+              Sair
+            </Button>
           </div>
         </div>
       </div>
