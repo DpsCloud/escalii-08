@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLocation, Link } from 'react-router-dom';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const isMobile = useIsMobile();
+  const location = useLocation();
   
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
@@ -28,6 +29,15 @@ export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen, toggleSidebar, isMobile]);
+
+  const menuItems = [
+    { path: '/', icon: <HomeIcon />, label: 'Dashboard' },
+    { path: '/aulas', icon: <BookIcon />, label: 'Aulas' },
+    { path: '/calendario', icon: <CalendarIcon />, label: 'Calendário' },
+    { path: '/presenca', icon: <CheckCircleIcon />, label: 'Presença' },
+    { path: '/materiais', icon: <FileIcon />, label: 'Materiais' },
+    { path: '/certificado', icon: <CertificateIcon />, label: 'Certificado' },
+  ];
 
   return (
     <>
@@ -51,48 +61,17 @@ export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           </div>
           
           <div className="space-y-1">
-            <NavItem 
-              href="#" 
-              icon={<HomeIcon />}
-              label="Dashboard" 
-              isActive={true} 
-              isCollapsed={!isOpen && !isMobile}
-            />
-            <NavItem 
-              href="#" 
-              icon={<BookIcon />}
-              label="Aulas" 
-              isActive={false} 
-              isCollapsed={!isOpen && !isMobile}
-            />
-            <NavItem 
-              href="#" 
-              icon={<CalendarIcon />}
-              label="Calendário" 
-              isActive={false} 
-              isCollapsed={!isOpen && !isMobile}
-            />
-            <NavItem 
-              href="#" 
-              icon={<CheckCircleIcon />}
-              label="Presença" 
-              isActive={false} 
-              isCollapsed={!isOpen && !isMobile}
-            />
-            <NavItem 
-              href="#" 
-              icon={<FileIcon />}
-              label="Materiais" 
-              isActive={false} 
-              isCollapsed={!isOpen && !isMobile}
-            />
-            <NavItem 
-              href="#" 
-              icon={<CertificateIcon />}
-              label="Certificado" 
-              isActive={false}
-              isCollapsed={!isOpen && !isMobile}
-            />
+            {menuItems.map((item) => (
+              <NavItem 
+                key={item.path}
+                to={item.path}
+                icon={item.icon}
+                label={item.label}
+                isActive={location.pathname === item.path}
+                isCollapsed={!isOpen && !isMobile}
+                onClick={isMobile ? toggleSidebar : undefined}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -101,22 +80,24 @@ export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
 };
 
 interface NavItemProps {
-  href: string;
+  to: string;
   icon: React.ReactNode;
   label: string;
   isActive: boolean;
   isCollapsed: boolean;
+  onClick?: () => void;
 }
 
-const NavItem = ({ href, icon, label, isActive, isCollapsed }: NavItemProps) => {
+const NavItem = ({ to, icon, label, isActive, isCollapsed, onClick }: NavItemProps) => {
   return (
-    <a 
-      href={href} 
+    <Link 
+      to={to}
+      onClick={onClick}
       className={`sidebar-link flex items-center p-3 rounded-lg ${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center' : ''}`}
     >
       <span className="h-5 w-5 mr-3">{icon}</span>
       {!isCollapsed && <span>{label}</span>}
-    </a>
+    </Link>
   );
 };
 
