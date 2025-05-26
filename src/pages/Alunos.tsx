@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Edit, Trash2, Plus, Search } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Eye, Edit, Trash2, Plus, Search, Phone, User } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 const Alunos = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,7 +32,10 @@ const Alunos = () => {
       email: 'joao@email.com',
       dataNascimento: '1990-05-15',
       curso: 'ESCALI 2025.1',
-      status: 'ativo'
+      turma: 'Turma A',
+      progresso: 75,
+      status: 'ativo',
+      foto: 'https://ui-avatars.com/api/?name=João+Silva&background=3b82f6&color=fff'
     },
     {
       id: '2',
@@ -40,7 +45,10 @@ const Alunos = () => {
       email: 'maria@email.com',
       dataNascimento: '1988-03-20',
       curso: 'ESCALI 2025.1',
-      status: 'ativo'
+      turma: 'Turma A',
+      progresso: 62,
+      status: 'ativo',
+      foto: 'https://ui-avatars.com/api/?name=Maria+Santos&background=ec4899&color=fff'
     },
     {
       id: '3',
@@ -50,7 +58,23 @@ const Alunos = () => {
       email: 'pedro@email.com',
       dataNascimento: '1992-08-10',
       curso: null,
-      status: 'pendente'
+      turma: null,
+      progresso: 0,
+      status: 'pendente',
+      foto: 'https://ui-avatars.com/api/?name=Pedro+Costa&background=10b981&color=fff'
+    },
+    {
+      id: '4',
+      nome: 'Ana Oliveira',
+      cpf: '444.444.444-44',
+      telefone: '(11) 66666-6666',
+      email: 'ana@email.com',
+      dataNascimento: '1985-12-03',
+      curso: 'ESCALI 2024.2',
+      turma: 'Turma B',
+      progresso: 100,
+      status: 'formado',
+      foto: 'https://ui-avatars.com/api/?name=Ana+Oliveira&background=f59e0b&color=fff'
     }
   ];
 
@@ -59,6 +83,26 @@ const Alunos = () => {
     aluno.cpf.includes(searchTerm) ||
     aluno.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'ativo': return 'bg-green-100 text-green-800';
+      case 'pendente': return 'bg-yellow-100 text-yellow-800';
+      case 'formado': return 'bg-blue-100 text-blue-800';
+      case 'inativo': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'ativo': return 'Ativo';
+      case 'pendente': return 'Pendente';
+      case 'formado': return 'Formado';
+      case 'inativo': return 'Inativo';
+      default: return status;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-muted flex">
@@ -100,16 +144,78 @@ const Alunos = () => {
               </div>
             </div>
 
-            {/* Tabela */}
-            <div className="overflow-x-auto">
+            {/* Versão Mobile - Cards */}
+            <div className="md:hidden space-y-4">
+              {filteredAlunos.map((aluno) => (
+                <div key={aluno.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={aluno.foto} alt={aluno.nome} />
+                      <AvatarFallback>
+                        {aluno.nome.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{aluno.nome}</h3>
+                      <p className="text-sm text-gray-600">{aluno.cpf}</p>
+                    </div>
+                    <Badge className={getStatusColor(aluno.status)}>
+                      {getStatusText(aluno.status)}
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Phone className="h-4 w-4 mr-2" />
+                      {aluno.telefone}
+                    </div>
+                    {aluno.curso && (
+                      <div className="flex items-center text-sm text-gray-600">
+                        <User className="h-4 w-4 mr-2" />
+                        {aluno.curso} - {aluno.turma}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Progresso do Curso</span>
+                      <span>{aluno.progresso}%</span>
+                    </div>
+                    <Progress value={aluno.progresso} className="h-2" />
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Button variant="ghost" size="sm" className="flex-1">
+                      <Eye className="h-4 w-4 mr-1" />
+                      Ver
+                    </Button>
+                    {isAdmin && (
+                      <>
+                        <Button variant="ghost" size="sm" className="flex-1">
+                          <Edit className="h-4 w-4 mr-1" />
+                          Editar
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Versão Desktop - Tabela */}
+            <div className="hidden md:block overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nome</TableHead>
+                    <TableHead>Aluno</TableHead>
                     <TableHead>CPF</TableHead>
-                    <TableHead className="hidden md:table-cell">Telefone</TableHead>
-                    <TableHead className="hidden lg:table-cell">Email</TableHead>
-                    <TableHead>Curso</TableHead>
+                    <TableHead>Telefone</TableHead>
+                    <TableHead>Curso/Turma</TableHead>
+                    <TableHead>Progresso</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
@@ -117,20 +223,43 @@ const Alunos = () => {
                 <TableBody>
                   {filteredAlunos.map((aluno) => (
                     <TableRow key={aluno.id}>
-                      <TableCell className="font-medium">{aluno.nome}</TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={aluno.foto} alt={aluno.nome} />
+                            <AvatarFallback>
+                              {aluno.nome.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-medium">{aluno.nome}</div>
+                            <div className="text-sm text-gray-500">{aluno.email}</div>
+                          </div>
+                        </div>
+                      </TableCell>
                       <TableCell>{aluno.cpf}</TableCell>
-                      <TableCell className="hidden md:table-cell">{aluno.telefone}</TableCell>
-                      <TableCell className="hidden lg:table-cell">{aluno.email}</TableCell>
+                      <TableCell>{aluno.telefone}</TableCell>
                       <TableCell>
                         {aluno.curso ? (
-                          <Badge variant="secondary">{aluno.curso}</Badge>
+                          <div>
+                            <div className="font-medium">{aluno.curso}</div>
+                            <div className="text-sm text-gray-500">{aluno.turma}</div>
+                          </div>
                         ) : (
                           <span className="text-gray-500">Sem curso</span>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={aluno.status === 'ativo' ? 'default' : 'secondary'}>
-                          {aluno.status === 'ativo' ? 'Ativo' : 'Pendente'}
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span>{aluno.progresso}%</span>
+                          </div>
+                          <Progress value={aluno.progresso} className="h-2" />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(aluno.status)}>
+                          {getStatusText(aluno.status)}
                         </Badge>
                       </TableCell>
                       <TableCell>
