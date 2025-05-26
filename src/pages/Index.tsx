@@ -29,28 +29,25 @@ const Index = () => {
         <Header toggleSidebar={toggleSidebar} />
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          {/* Welcome Section */}
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">Olá, João!</h1>
-            <p className="text-sm sm:text-base text-gray-600">Bem-vindo ao seu dashboard do curso ESCALI Capacitação de Líderes - Turma 2025.1</p>
-          </div>
-
-          {/* Status Cards */}
-          <StatusCards />
-
-          {/* Main Content Sections */}
-           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 h-full">
             {/* Left Column */}
-            <div className="lg:col-span-2 space-y-4 md:space-y-6">
-              <UpcomingClasses />
-              <RecentMaterials />
+            <div className="lg:col-span-2 space-y-4 md:space-y-6 h-full bg-white p-4 flex flex-col justify-between">
+              <div>
+                <UpcomingClasses />
+              </div>
+              <div>
+                <RecentMaterials />
+              </div>
             </div>
-
+          
             {/* Right Column */}
-            <div className="space-y-4 md:space-y-6">
-              <AttendanceForm />
-              <CourseProgress />
+            <div className="space-y-4 md:space-y-6 h-full bg-white p-4 flex flex-col justify-between">
+              <div>
+                <AttendanceForm />
+              </div>
+              <div>
+                <CourseProgress />
+              </div>
             </div>
           </div>
         </main>
