@@ -28,24 +28,17 @@ const Index = () => {
         {/* Top Navigation */}
         <Header toggleSidebar={toggleSidebar} />
 
-        {/* Main Content Area */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 h-full">
-            {/* Left Column */}
-            <div className="lg:col-span-2 space-y-4 md:space-y-6 h-full bg-white p-4 flex flex-col justify-between">
-              <div>
+        {/* Main Content Sections */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 h-full">
+              {/* Left Column */}
+              <div className="lg:col-span-2 space-y-4 md:space-y-6 h-full bg-white p-4 flex flex-col justify-between">
                 <UpcomingClasses />
-              </div>
-              <div>
                 <RecentMaterials />
               </div>
-            </div>
-          
-            {/* Right Column */}
-            <div className="space-y-4 md:space-y-6 h-full bg-white p-4 flex flex-col justify-between">
-              <div>
+            
+              {/* Right Column */}
+              <div className="space-y-4 md:space-y-6 h-full bg-white p-4 flex flex-col justify-between">
                 <AttendanceForm />
-              </div>
-              <div>
                 <CourseProgress />
               </div>
             </div>
