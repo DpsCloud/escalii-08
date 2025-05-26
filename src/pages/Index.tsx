@@ -45,13 +45,14 @@ const Index = () => {
             <div className="lg:col-span-2 space-y-4 md:space-y-6">
               <UpcomingClasses />
               <RecentMaterials />
-              <CourseProgress />
+
             </div>
 
             {/* Right Column */}
             <div className="space-y-4 md:space-y-6">
               <AttendanceForm />
-              <Notifications />
+              <CourseProgress />
+            
             </div>
           </div>
         </main>
