@@ -29,7 +29,7 @@ const Index = () => {
         <Header toggleSidebar={toggleSidebar} />
 
         {/* Main Content Sections */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 h-full">
+            <main className="flex-1 overflow-y-auto p-4 md:p-6 h-full">
               {/* Left Column */}
               <div className="lg:col-span-2 space-y-4 md:space-y-6 h-full bg-white p-4 flex flex-col justify-between">
                 <UpcomingClasses />
