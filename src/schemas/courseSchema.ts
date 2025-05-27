@@ -4,11 +4,9 @@ import { TURMAS_DISPONIVEIS } from '@/types/course';
 
 export const courseSchema = z.object({
   tipo: z.enum(['capacitacao', 'revalidacao'], {
-    required_error: "Tipo do curso é obrigatório",
     errorMap: () => ({ message: "Selecione 'Capacitação' ou 'Revalidação'" })
   }),
   turma: z.enum(TURMAS_DISPONIVEIS, {
-    required_error: "Turma é obrigatória",
     errorMap: () => ({ message: "Selecione uma turma disponível (ex: 2025.1, 2025.2)" })
   }),
   dataInicio: z.string().min(1, "Data de início é obrigatória"),
@@ -17,7 +15,7 @@ export const courseSchema = z.object({
   cargaHoraria: z.number().min(1, "Carga horária deve ser maior que 0"),
   maxAlunos: z.number().min(1, "Máximo de alunos deve ser maior que 0"),
   status: z.enum(['planejado', 'ativo', 'finalizado', 'cancelado'], {
-    required_error: "Status é obrigatório",
+    errorMap: () => ({ message: "Status é obrigatório" })
   }),
 });
 
