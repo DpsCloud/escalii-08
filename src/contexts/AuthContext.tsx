@@ -8,12 +8,18 @@ interface User {
   tipoUsuario: 'admin' | 'aluno';
 }
 
+interface LoginResponse {
+  status: 'success' | 'error';
+  message?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
   isAluno: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<LoginResponse>;
   logout: () => void;
 }
 
@@ -21,6 +27,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Simular usuário logado para desenvolvimento
@@ -28,21 +35,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: '1',
       nome: 'João Silva',
       email: 'joao@exemplo.com',
-      tipoUsuario: 'aluno' // Mudando de 'instrutor' para 'aluno'
+      tipoUsuario: 'aluno'
     };
     setUser(mockUser);
+    setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Simular login
-    const mockUser: User = {
-      id: '1',
-      nome: 'João Silva',
-      email: email,
-      tipoUsuario: email.includes('admin') ? 'admin' : 'aluno'
-    };
-    setUser(mockUser);
-    return true;
+  const login = async (email: string, password: string): Promise<LoginResponse> => {
+    setLoading(true);
+    try {
+      // Simular login
+      const mockUser: User = {
+        id: '1',
+        nome: 'João Silva',
+        email: email,
+        tipoUsuario: email.includes('admin') ? 'admin' : 'aluno'
+      };
+      setUser(mockUser);
+      setLoading(false);
+      return { status: 'success' };
+    } catch (error) {
+      setLoading(false);
+      return { status: 'error', message: 'Erro ao fazer login' };
+    }
   };
 
   const logout = () => {
@@ -54,6 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated: !!user,
     isAdmin: user?.tipoUsuario === 'admin',
     isAluno: user?.tipoUsuario === 'aluno',
+    loading,
     login,
     logout
   };

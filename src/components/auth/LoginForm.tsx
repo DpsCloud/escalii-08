@@ -141,7 +141,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onRegist
 
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <p className="text-xs text-gray-500 text-center">
-            Demo: Use CPF 111.111.111-11 (Admin) ou 222.222.222-22 (Instrutor)
+            Demo: Use CPF 111.111.111-11 (Admin) ou 222.222.222-22 (Aluno)
           </p>
         </div>
       </div>
