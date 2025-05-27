@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 
 const Aulas = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -19,7 +21,8 @@ const Aulas = () => {
       status: "Concluída", 
       data: "2023-05-10", 
       duracao: "2h",
-      descricao: "Fundamentos da comunicação eficaz na liderança"
+      descricao: "Fundamentos da comunicação eficaz na liderança",
+      videoUrl: "/aula/1"
     },
     { 
       id: 2, 
@@ -27,7 +30,8 @@ const Aulas = () => {
       status: "Concluída", 
       data: "2023-05-17", 
       duracao: "2h",
-      descricao: "Características essenciais de um líder cristão"
+      descricao: "Características essenciais de um líder cristão",
+      videoUrl: "/aula/2"
     },
     { 
       id: 3, 
@@ -35,7 +39,8 @@ const Aulas = () => {
       status: "Concluída", 
       data: "2023-05-24", 
       duracao: "2h",
-      descricao: "A importância da escuta ativa e obediência"
+      descricao: "A importância da escuta ativa e obediência",
+      videoUrl: "/aula/3"
     },
     { 
       id: 4, 
@@ -43,7 +48,8 @@ const Aulas = () => {
       status: "Concluída", 
       data: "2023-05-31", 
       duracao: "2h",
-      descricao: "Desenvolvendo o caráter cristão na liderança"
+      descricao: "Desenvolvendo o caráter cristão na liderança",
+      videoUrl: "/aula/4"
     },
     { 
       id: 5, 
@@ -51,7 +57,8 @@ const Aulas = () => {
       status: "Concluída", 
       data: "2023-06-07", 
       duracao: "2h",
-      descricao: "Princípios de honra e lealdade no ministério"
+      descricao: "Princípios de honra e lealdade no ministério",
+      videoUrl: "/aula/5"
     },
     { 
       id: 6, 
@@ -59,7 +66,8 @@ const Aulas = () => {
       status: "Próxima", 
       data: "2023-06-14", 
       duracao: "2h",
-      descricao: "Identificando e superando a imaturidade espiritual"
+      descricao: "Identificando e superando a imaturidade espiritual",
+      videoUrl: "/aula/6"
     },
     { 
       id: 7, 
@@ -67,7 +75,8 @@ const Aulas = () => {
       status: "Pendente", 
       data: "2023-06-21", 
       duracao: "2h",
-      descricao: "O papel da comunhão na liderança"
+      descricao: "O papel da comunhão na liderança",
+      videoUrl: "/aula/7"
     },
     { 
       id: 8, 
@@ -75,9 +84,21 @@ const Aulas = () => {
       status: "Pendente", 
       data: "2023-06-28", 
       duracao: "2h",
-      descricao: "Qualidades essenciais para a liderança eficaz"
+      descricao: "Qualidades essenciais para a liderança eficaz",
+      videoUrl: "/aula/8"
     },
   ];
+
+  const handleAulaClick = (aula: any) => {
+    if (aula.status === "Pendente") return;
+    
+    // Navegar para a página da aula específica
+    navigate(`/aula/${aula.id}`, { 
+      state: { 
+        aula: aula 
+      } 
+    });
+  };
 
   return (
     <div className="min-h-screen bg-muted flex">
@@ -120,6 +141,7 @@ const Aulas = () => {
                 </div>
 
                 <button 
+                  onClick={() => handleAulaClick(aula)}
                   className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
                     aula.status === "Concluída" ? 
                       "bg-green-100 text-green-800 hover:bg-green-200" :

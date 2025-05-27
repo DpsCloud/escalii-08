@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const Materiais = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filtroTipo, setFiltroTipo] = useState('todos');
+  const [materialVisualizando, setMaterialVisualizando] = useState(null);
   const isMobile = useIsMobile();
 
   const toggleSidebar = () => {
@@ -21,7 +23,8 @@ const Materiais = () => {
       tamanho: "2.3 MB",
       dataUpload: "2023-06-08",
       categoria: "aula",
-      status: "disponivel"
+      status: "disponivel",
+      url: "/materiais/aula-5-honra-lealdade.pdf"
     },
     {
       id: 2,
@@ -30,7 +33,8 @@ const Materiais = () => {
       tamanho: "1.8 MB",
       dataUpload: "2023-06-01",
       categoria: "aula",
-      status: "disponivel"
+      status: "disponivel",
+      url: "/materiais/aula-4-dna-cristo.pdf"
     },
     {
       id: 3,
@@ -39,7 +43,8 @@ const Materiais = () => {
       tamanho: "2.1 MB",
       dataUpload: "2023-05-25",
       categoria: "aula",
-      status: "disponivel"
+      status: "disponivel",
+      url: "/materiais/aula-3-ouvir-confiar-obedecer.pdf"
     },
     {
       id: 4,
@@ -48,7 +53,8 @@ const Materiais = () => {
       tamanho: "5.2 MB",
       dataUpload: "2023-05-10",
       categoria: "manual",
-      status: "disponivel"
+      status: "disponivel",
+      url: "/materiais/manual-estudante-escali.pdf"
     },
     {
       id: 5,
@@ -57,7 +63,8 @@ const Materiais = () => {
       tamanho: "150 MB",
       dataUpload: "2023-05-10",
       categoria: "video",
-      status: "disponivel"
+      status: "disponivel",
+      url: "/materiais/video-introducao.mp4"
     },
     {
       id: 6,
@@ -66,7 +73,8 @@ const Materiais = () => {
       tamanho: "0.8 MB",
       dataUpload: "2023-05-15",
       categoria: "exercicio",
-      status: "disponivel"
+      status: "disponivel",
+      url: "/materiais/exercicios-modulo-1.docx"
     },
     {
       id: 7,
@@ -75,7 +83,8 @@ const Materiais = () => {
       tamanho: "2.5 MB",
       dataUpload: "2023-06-14",
       categoria: "aula",
-      status: "breve"
+      status: "breve",
+      url: "/materiais/aula-6-dimensoes-imaturidade.pdf"
     }
   ];
 
@@ -90,6 +99,32 @@ const Materiais = () => {
       case 'doc': return 'text-blue-600 bg-blue-100';
       default: return 'text-gray-600 bg-gray-100';
     }
+  };
+
+  const handleVisualizar = (material: any) => {
+    if (material.status !== 'disponivel') return;
+    
+    if (material.tipo === 'video') {
+      // Para vídeos, abrir em nova aba ou player
+      window.open(material.url, '_blank');
+    } else {
+      // Para PDFs e documentos, abrir modal de visualização
+      setMaterialVisualizando(material);
+    }
+  };
+
+  const handleBaixar = (material: any) => {
+    if (material.status !== 'disponivel') return;
+    
+    // Simular download
+    const link = document.createElement('a');
+    link.href = material.url;
+    link.download = material.titulo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log(`Baixando: ${material.titulo}`);
   };
 
   return (
@@ -172,13 +207,21 @@ const Materiais = () => {
                   <div className="flex items-center gap-2">
                     {material.status === 'disponivel' ? (
                       <>
-                        <button className="p-2 text-gray-500 hover:text-blue-600 transition-colors">
+                        <button 
+                          onClick={() => handleVisualizar(material)}
+                          className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
+                          title="Visualizar"
+                        >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
                         </button>
-                        <button className="p-2 text-gray-500 hover:text-blue-600 transition-colors">
+                        <button 
+                          onClick={() => handleBaixar(material)}
+                          className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
+                          title="Baixar"
+                        >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                           </svg>
@@ -196,6 +239,29 @@ const Materiais = () => {
           </div>
         </main>
       </div>
+
+      {/* Modal de Visualização */}
+      <Dialog open={!!materialVisualizando} onOpenChange={() => setMaterialVisualizando(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>{materialVisualizando?.titulo}</DialogTitle>
+          </DialogHeader>
+          <div className="h-[70vh] bg-gray-100 rounded-lg flex items-center justify-center">
+            <div className="text-center text-gray-600">
+              <p className="text-lg mb-2">Visualização do Material</p>
+              <p className="text-sm">
+                Aqui seria exibido o conteúdo do arquivo: {materialVisualizando?.titulo}
+              </p>
+              <button 
+                onClick={() => materialVisualizando && handleBaixar(materialVisualizando)}
+                className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Baixar Material
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -11,7 +11,7 @@ interface SidebarProps {
 export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const isMobile = useIsMobile();
   const location = useLocation();
-  const { isAdmin, isInstructor } = useAuth();
+  const { isAdmin, isAluno } = useAuth();
   
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
@@ -41,8 +41,8 @@ export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     { path: '/relatorios', icon: <ReportsIcon />, label: 'Relatórios' }
   ];
 
-  // Menu items para instrutores
-  const instructorMenuItems = [
+  // Menu items para alunos
+  const alunoMenuItems = [
     { path: '/', icon: <HomeIcon />, label: 'Dashboard' },
     { path: '/aulas', icon: <BookIcon />, label: 'Aulas' },
     { path: '/calendario', icon: <CalendarIcon />, label: 'Calendário' },
@@ -52,7 +52,7 @@ export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   ];
 
   // Seleciona os itens do menu baseado no tipo de usuário
-  const menuItems = isAdmin ? adminMenuItems : instructorMenuItems;
+  const menuItems = isAdmin ? adminMenuItems : alunoMenuItems;
 
   return (
     <>
