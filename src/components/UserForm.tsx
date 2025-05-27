@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -44,7 +43,12 @@ export const UserForm = ({ onClose, editingUser }: UserFormProps) => {
     try {
       if (editingUser) {
         updateUsuario(editingUser.id, {
-          ...data,
+          nome: data.nome,
+          cpf: data.cpf,
+          email: data.email,
+          telefone: data.telefone,
+          tipoUsuario: data.tipoUsuario,
+          status: data.status,
           ultimoAcesso: new Date().toISOString().split('T')[0]
         });
         toast({
@@ -54,7 +58,12 @@ export const UserForm = ({ onClose, editingUser }: UserFormProps) => {
       } else {
         addUsuario({
           id: Date.now().toString(),
-          ...data,
+          nome: data.nome,
+          cpf: data.cpf,
+          email: data.email,
+          telefone: data.telefone,
+          tipoUsuario: data.tipoUsuario,
+          status: data.status,
           ultimoAcesso: new Date().toISOString().split('T')[0]
         });
         toast({
