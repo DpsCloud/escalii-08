@@ -11,7 +11,7 @@ interface SidebarProps {
 export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const isMobile = useIsMobile();
   const location = useLocation();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isInstructor } = useAuth();
   
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
@@ -32,25 +32,27 @@ export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     };
   }, [isOpen, toggleSidebar, isMobile]);
 
-  const menuItems = [
+  // Menu items para administradores
+  const adminMenuItems = [
+    { path: '/dashboard', icon: <DashboardIcon />, label: 'Dashboard Admin' },
+    { path: '/alunos', icon: <UsersIcon />, label: 'Alunos' },
+    { path: '/cursos', icon: <BookOpenIcon />, label: 'Cursos' },
+    { path: '/usuarios', icon: <UserIcon />, label: 'Usuários' },
+    { path: '/relatorios', icon: <ReportsIcon />, label: 'Relatórios' }
+  ];
+
+  // Menu items para instrutores
+  const instructorMenuItems = [
     { path: '/', icon: <HomeIcon />, label: 'Dashboard' },
     { path: '/aulas', icon: <BookIcon />, label: 'Aulas' },
     { path: '/calendario', icon: <CalendarIcon />, label: 'Calendário' },
     { path: '/presenca', icon: <CheckCircleIcon />, label: 'Presença' },
     { path: '/materiais', icon: <FileIcon />, label: 'Materiais' },
-    { path: '/certificado', icon: <CertificateIcon />, label: 'Certificado' },
+    { path: '/certificado', icon: <CertificateIcon />, label: 'Certificado' }
   ];
 
-  // Adicionar itens de gestão apenas para admin
-  if (isAdmin) {
-    menuItems.splice(1, 0, { path: '/dashboard', icon: <DashboardIcon />, label: 'Dashboard Admin' });
-    menuItems.push(
-      { path: '/alunos', icon: <UsersIcon />, label: 'Alunos' },
-      { path: '/cursos', icon: <BookOpenIcon />, label: 'Cursos' },
-      { path: '/usuarios', icon: <UserIcon />, label: 'Usuários' },
-      { path: '/relatorios', icon: <ReportsIcon />, label: 'Relatórios' }
-    );
-  }
+  // Seleciona os itens do menu baseado no tipo de usuário
+  const menuItems = isAdmin ? adminMenuItems : instructorMenuItems;
 
   return (
     <>
