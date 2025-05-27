@@ -9,10 +9,11 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { courseSchema, CourseFormData } from '@/schemas/courseSchema';
 import { useCourseStore } from '@/stores/useCourseStore';
 import { toast } from '@/components/ui/use-toast';
+import { Course } from '@/types/course';
 
 interface CourseFormProps {
   onClose: () => void;
-  editingCourse?: any;
+  editingCourse?: Course;
 }
 
 export const CourseForm = ({ onClose, editingCourse }: CourseFormProps) => {
@@ -57,15 +58,26 @@ export const CourseForm = ({ onClose, editingCourse }: CourseFormProps) => {
           description: "Os dados do curso foram atualizados com sucesso.",
         });
       } else {
-        addCourse({
+        const newCourse: Course = {
           id: Date.now().toString(),
-          ...data,
+          nome: data.nome,
+          descricao: data.descricao,
+          tipo: data.tipo,
+          periodo: data.periodo,
+          dataInicio: data.dataInicio,
+          dataFim: data.dataFim,
+          totalAulas: data.totalAulas,
+          cargaHoraria: data.cargaHoraria,
+          maxAlunos: data.maxAlunos,
+          status: data.status,
           inscricoesAbertas: false,
           alunosInscritos: 0,
           turmas: [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
-        });
+        };
+        
+        addCourse(newCourse);
         toast({
           title: "Curso criado",
           description: "O curso foi criado com sucesso.",

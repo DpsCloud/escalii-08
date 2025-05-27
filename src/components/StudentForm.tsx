@@ -9,10 +9,11 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { studentSchema, StudentFormData } from '@/schemas/studentSchema';
 import { useStudentStore } from '@/stores/useStudentStore';
 import { toast } from '@/components/ui/use-toast';
+import { Student } from '@/types/student';
 
 interface StudentFormProps {
   onClose: () => void;
-  editingStudent?: any;
+  editingStudent?: Student;
 }
 
 export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
@@ -54,28 +55,60 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
     
     try {
       if (editingStudent) {
-        updateStudent(editingStudent.id, {
-          ...data,
+        const updatedData: Partial<Student> = {
+          nome: data.nome,
+          cpf: data.cpf,
+          email: data.email,
+          telefone: data.telefone,
+          dataNascimento: data.dataNascimento,
+          endereco: data.endereco ? {
+            rua: data.endereco.rua,
+            numero: data.endereco.numero,
+            bairro: data.endereco.bairro,
+            cidade: data.endereco.cidade,
+            cep: data.endereco.cep,
+            estado: data.endereco.estado
+          } : undefined,
+          status: data.status,
+          observacoes: data.observacoes,
           foto: editingStudent.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nome)}&background=3b82f6&color=fff`
-        });
+        };
+        
+        updateStudent(editingStudent.id, updatedData);
         toast({
           title: "Aluno atualizado",
           description: "Os dados do aluno foram atualizados com sucesso.",
         });
       } else {
-        addStudent({
+        const newStudent: Student = {
           id: Date.now().toString(),
-          ...data,
+          nome: data.nome,
+          cpf: data.cpf,
+          telefone: data.telefone,
+          email: data.email,
+          dataNascimento: data.dataNascimento,
+          endereco: data.endereco ? {
+            rua: data.endereco.rua,
+            numero: data.endereco.numero,
+            bairro: data.endereco.bairro,
+            cidade: data.endereco.cidade,
+            cep: data.endereco.cep,
+            estado: data.endereco.estado
+          } : undefined,
           curso: undefined,
           turma: undefined,
           progresso: 0,
+          status: data.status,
           foto: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nome)}&background=3b82f6&color=fff`,
           dataMatricula: new Date().toISOString().split('T')[0],
           presencaGeral: 0,
           aulasAssistidas: 0,
           aproveitamento: 0,
-          certificadoDisponivel: false
-        });
+          certificadoDisponivel: false,
+          observacoes: data.observacoes
+        };
+        
+        addStudent(newStudent);
         toast({
           title: "Aluno criado",
           description: "O aluno foi criado com sucesso.",
