@@ -128,7 +128,7 @@ const Cursos = () => {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
-                    placeholder="Buscar por nome ou período..."
+                    placeholder="Buscar por nome ou turma..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
@@ -160,7 +160,7 @@ const Cursos = () => {
                     >
                       <h3 className="text-lg font-semibold text-gray-800 mb-1">{course.nome}</h3>
                     </button>
-                    <p className="text-sm text-gray-600 mb-2">Período: {course.periodo}</p>
+                    <p className="text-sm text-gray-600 mb-2">Turma: {course.turma}</p>
                     <div className="flex gap-2 mb-2">
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${getStatusColor(course.status)}`}>
                         {getStatusText(course.status)}
