@@ -19,7 +19,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isAluno: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<LoginResponse>;
+  login: (cpf: string, senha: string) => Promise<LoginResponse>;
   logout: () => void;
 }
 
@@ -30,28 +30,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simular usuário logado para desenvolvimento
-    const mockUser: User = {
-      id: '1',
-      nome: 'João Silva',
-      email: 'joao@exemplo.com',
-      tipoUsuario: 'aluno'
-    };
-    setUser(mockUser);
+    // Verificar se há usuário salvo no localStorage
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<LoginResponse> => {
+  const login = async (cpf: string, senha: string): Promise<LoginResponse> => {
     setLoading(true);
     try {
-      // Simular login
-      const mockUser: User = {
-        id: '1',
-        nome: 'João Silva',
-        email: email,
-        tipoUsuario: email.includes('admin') ? 'admin' : 'aluno'
-      };
+      // Simular login com CPFs demo
+      let mockUser: User;
+      
+      if (cpf === '111.111.111-11' || cpf === '11111111111') {
+        mockUser = {
+          id: '1',
+          nome: 'Admin Silva',
+          email: 'admin@exemplo.com',
+          tipoUsuario: 'admin'
+        };
+      } else if (cpf === '222.222.222-22' || cpf === '22222222222') {
+        mockUser = {
+          id: '2',
+          nome: 'João Silva',
+          email: 'joao@exemplo.com',
+          tipoUsuario: 'aluno'
+        };
+      } else {
+        setLoading(false);
+        return { status: 'error', message: 'CPF ou senha inválidos' };
+      }
+      
       setUser(mockUser);
+      localStorage.setItem('user', JSON.stringify(mockUser));
       setLoading(false);
       return { status: 'success' };
     } catch (error) {
@@ -62,6 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('user');
   };
 
   const value = {

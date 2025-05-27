@@ -1,6 +1,7 @@
+
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bell, Menu } from "lucide-react";
+import { Bell, Menu, LogOut } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 interface HeaderProps {
@@ -26,7 +27,7 @@ const alunoMenuItems = [
 ];
 
 export const Header = ({ toggleSidebar }: HeaderProps) => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const location = useLocation();
 
   // Determina qual conjunto de itens do menu usar
@@ -38,6 +39,10 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
       location.pathname === item.path ||
       (item.path !== "/" && location.pathname.startsWith(item.path))
   );
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <header className="sticky top-0 z-10 bg-white border-b h-14 min-h-[56px] flex items-center px-4 shadow-sm">
@@ -69,7 +74,7 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
         <div className="flex items-center space-x-2">
           <div className="text-right mr-2">
             <p className="text-sm font-medium truncate max-w-[150px]">
-              {user?.name || "Usuário"}
+              {user?.nome || "Usuário"}
             </p>
             <p className="text-xs text-muted-foreground truncate max-w-[150px]">
               {user?.email || "usuario@email.com"}
@@ -77,9 +82,18 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
           </div>
           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
             <span className="text-sm font-medium text-primary">
-              {user?.name?.[0]?.toUpperCase() || "U"}
+              {user?.nome?.[0]?.toUpperCase() || "U"}
             </span>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+            className="hover:bg-gray-100"
+            title="Sair"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </header>
