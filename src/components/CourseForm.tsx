@@ -246,7 +246,7 @@ export const CourseForm = ({ onClose, editingCourse }: CourseFormProps) => {
               <Checkbox 
                 id="turma-customizada" 
                 checked={turmaCustomizada}
-                onCheckedChange={setTurmaCustomizada}
+                onCheckedChange={(checked) => setTurmaCustomizada(checked === true)}
               />
               <label htmlFor="turma-customizada" className="text-sm font-medium">
                 Usar turma customizada
