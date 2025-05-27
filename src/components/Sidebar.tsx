@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLocation, Link } from 'react-router-dom';
@@ -37,6 +38,7 @@ export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     { path: '/dashboard', icon: <DashboardIcon />, label: 'Dashboard Admin' },
     { path: '/alunos', icon: <UsersIcon />, label: 'Alunos' },
     { path: '/cursos', icon: <BookOpenIcon />, label: 'Cursos' },
+    { path: '/aulas-admin', icon: <BookIcon />, label: 'Aulas' },
     { path: '/usuarios', icon: <UserIcon />, label: 'Usuários' },
     { path: '/relatorios', icon: <ReportsIcon />, label: 'Relatórios' }
   ];

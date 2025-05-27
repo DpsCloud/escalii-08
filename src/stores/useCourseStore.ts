@@ -21,9 +21,10 @@ interface CourseStore {
   setSearchTerm: (term: string) => void;
   setFilterType: (type: string) => void;
   getFilteredCourses: () => Course[];
+  getAllCourses: () => Course[];
 }
 
-// Dados mock atualizados
+// Dados mock atualizados com terminologia padronizada
 const mockCourses: Course[] = [
   {
     id: '1',
@@ -55,7 +56,35 @@ const mockCourses: Course[] = [
         maxAulas: 8
       }
     ],
-    aulas: [],
+    aulas: [
+      {
+        id: 'a1',
+        titulo: 'Fundamentos da Liderança Cristã',
+        descricao: 'Introdução aos princípios básicos da liderança bíblica',
+        cursoId: '1',
+        ordem: 1,
+        duracao: 90,
+        dataAula: '2025-05-05',
+        videoUrl: 'https://example.com/video1',
+        materiais: [],
+        status: 'concluida',
+        createdAt: '2025-01-15T10:00:00Z',
+        updatedAt: '2025-01-15T10:00:00Z'
+      },
+      {
+        id: 'a2',
+        titulo: 'Caráter do Líder',
+        descricao: 'Desenvolvimento do caráter cristão na liderança',
+        cursoId: '1',
+        ordem: 2,
+        duracao: 90,
+        dataAula: '2025-05-12',
+        materiais: [],
+        status: 'ativa',
+        createdAt: '2025-01-15T10:00:00Z',
+        updatedAt: '2025-01-15T10:00:00Z'
+      }
+    ],
     createdAt: '2025-01-15T10:00:00Z',
     updatedAt: '2025-01-20T15:30:00Z'
   },
@@ -108,7 +137,21 @@ const mockCourses: Course[] = [
         maxAulas: 4
       }
     ],
-    aulas: [],
+    aulas: [
+      {
+        id: 'a3',
+        titulo: 'Atualização em Liderança',
+        descricao: 'Novas abordagens em liderança cristã',
+        cursoId: '3',
+        ordem: 1,
+        duracao: 60,
+        dataAula: '2025-06-05',
+        materiais: [],
+        status: 'ativa',
+        createdAt: '2025-01-10T14:00:00Z',
+        updatedAt: '2025-01-10T14:00:00Z'
+      }
+    ],
     createdAt: '2025-01-10T14:00:00Z',
     updatedAt: '2025-01-18T09:15:00Z'
   }
@@ -164,6 +207,11 @@ export const useCourseStore = create<CourseStore>()(
           
           return matchesSearch && matchesFilter;
         });
+      },
+
+      getAllCourses: () => {
+        const { courses } = get();
+        return courses;
       }
     }),
     {
