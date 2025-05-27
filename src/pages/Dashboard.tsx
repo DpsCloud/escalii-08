@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, BookOpen, Calendar, GraduationCap, TrendingUp, CheckCircle } from 'lucide-react';
 
@@ -16,29 +16,53 @@ const Dashboard = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Mock data - em produção viria da API
-  const dashboardData = {
-    totalAlunos: 156,
-    totalCursos: 4,
-    turmasAtivas: 2,
-    proximasFormaturas: 1,
-    presencaMedia: 87,
-    aproveitamento: 92
-  };
-
-  const cursosRecentes = [
+  const cards = [
     {
-      nome: 'ESCALI 2025.1',
-      alunos: 35,
-      status: 'Em andamento',
-      progresso: 62
+      title: "Progresso do Curso",
+      value: "62%",
+      description: "5/8 Aulas",
+      icon: <TrendingUp className="h-4 w-4 text-muted-foreground" />
     },
     {
-      nome: 'ESCALI 2024.2',
-      alunos: 48,
-      status: 'Finalizado',
-      progresso: 100
+      title: "Presença",
+      value: "100%",
+      description: "5 aulas assistidas",
+      icon: <CheckCircle className="h-4 w-4 text-muted-foreground" />
+    },
+    {
+      title: "Próxima Aula",
+      value: "Aula 6",
+      description: "9 Dimensões da Imaturidade",
+      icon: <Calendar className="h-4 w-4 text-muted-foreground" />
+    },
+    {
+      title: "Certificado",
+      value: "Em andamento",
+      description: "3 aulas restantes",
+      icon: <GraduationCap className="h-4 w-4 text-muted-foreground" />
     }
+  ];
+
+  const aulas = [
+    {
+      data: "JUN 15",
+      hora: "19:30",
+      titulo: "9 Dimensões da Imaturidade",
+      numero: 6
+    },
+    {
+      data: "JUN 22",
+      hora: "19:30",
+      titulo: "Propósito da Mesa",
+      numero: 7
+    }
+  ];
+
+  const modulos = [
+    { nome: "Módulo 1: Fundamentos", progresso: 100 },
+    { nome: "Módulo 2: Liderança", progresso: 75 },
+    { nome: "Módulo 3: Comunicação", progresso: 40 },
+    { nome: "Módulo 4: Gestão", progresso: 0 }
   ];
 
   if (!isAdmin) {
@@ -53,158 +77,89 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-muted flex">
+    <div className="min-h-screen bg-muted flex max-w-full">
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isMobile ? 'w-full' : (sidebarOpen ? 'ml-64' : 'ml-[70px]')}`}>
+      
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+        isMobile ? 'w-full' : (sidebarOpen ? 'ml-64' : 'ml-[70px]')
+      }`}>
         <Header toggleSidebar={toggleSidebar} />
+        
+        <main className="flex-1 overflow-y-auto p-0 sm:p-4 md:p-6">
+          <div className="max-w-7xl mx-auto px-4 space-y-6 w-full">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">Dashboard</h1>
+              <p className="text-sm sm:text-base text-gray-600">Bem-vindo ao seu dashboard do curso ESCALI</p>
+            </div>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="mb-8">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">Dashboard Administrativo</h1>
-            <p className="text-sm sm:text-base text-gray-600">Visão geral do sistema ESCALI</p>
-          </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {cards.map((card, index) => (
+                <Card key={index} className="w-full min-w-[200px]">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+                    {card.icon}
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{card.value}</div>
+                    <p className="text-xs text-muted-foreground">{card.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-          {/* Cards de Estatísticas - Restaurando gap original */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Alunos</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{dashboardData.totalAlunos}</div>
-                <p className="text-xs text-muted-foreground">
-                  +12 novos este mês
-                </p>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card className="w-full min-w-[300px]">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Próximas Aulas</CardTitle>
+                    <Button variant="outline" size="sm">Ver todas</Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {aulas.map((aula, index) => (
+                      <div key={index} className="flex items-center space-x-4 p-3 bg-muted/50 rounded-lg">
+                        <div className="flex-shrink-0 w-16 text-center">
+                          <div className="text-sm font-semibold">{aula.data}</div>
+                          <div className="text-xs text-muted-foreground">{aula.hora}</div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium truncate">{aula.titulo}</h4>
+                          <p className="text-xs text-muted-foreground">Aula {aula.numero}</p>
+                        </div>
+                        <Button variant="outline" size="sm" className="flex-shrink-0">
+                          Detalhes
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Cursos Ativos</CardTitle>
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{dashboardData.totalCursos}</div>
-                <p className="text-xs text-muted-foreground">
-                  {dashboardData.turmasAtivas} turmas em andamento
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Próximas Formaturas</CardTitle>
-                <GraduationCap className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{dashboardData.proximasFormaturas}</div>
-                <p className="text-xs text-muted-foreground">
-                  ESCALI 2025.1 em Julho
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Presença Média</CardTitle>
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{dashboardData.presencaMedia}%</div>
-                <p className="text-xs text-muted-foreground">
-                  +5% vs mês anterior
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Aproveitamento</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{dashboardData.aproveitamento}%</div>
-                <p className="text-xs text-muted-foreground">
-                  Média de conclusão
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Próxima Aula</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">Amanhã</div>
-                <p className="text-xs text-muted-foreground">
-                  Aula 6 - 19:30h
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Seção de Cursos Recentes - Restaurando gap original */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Cursos Recentes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {cursosRecentes.map((curso, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <h4 className="font-semibold">{curso.nome}</h4>
-                        <p className="text-sm text-gray-600">{curso.alunos} alunos • {curso.status}</p>
-                        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full" 
-                            style={{ width: `${curso.progresso}%` }}
-                          ></div>
+              <Card className="w-full min-w-[300px]">
+                <CardHeader>
+                  <CardTitle>Progresso do Curso</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {modulos.map((modulo, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-medium text-gray-700 truncate pr-2">{modulo.nome}</span>
+                          <span className="font-medium whitespace-nowrap">{modulo.progresso}%</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div
+                            className="bg-primary h-2 rounded-full transition-all"
+                            style={{ width: `${modulo.progresso}%` }}
+                          />
                         </div>
                       </div>
-                      <div className="ml-4">
-                        <span className="text-lg font-bold">{curso.progresso}%</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Atividades Recentes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                    <div>
-                      <p className="text-sm font-medium">Novo aluno cadastrado</p>
-                      <p className="text-xs text-gray-500">Pedro Silva - há 2 horas</p>
-                    </div>
+                    ))}
                   </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                    <div>
-                      <p className="text-sm font-medium">Material da Aula 5 adicionado</p>
-                      <p className="text-xs text-gray-500">há 1 dia</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                    <div>
-                      <p className="text-sm font-medium">Presença registrada</p>
-                      <p className="text-xs text-gray-500">Aula 5 - 35 alunos presentes - há 3 dias</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </main>
       </div>

@@ -1,89 +1,84 @@
-
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { Bell, Menu } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 interface HeaderProps {
   toggleSidebar: () => void;
 }
 
-export const Header = ({ toggleSidebar }: HeaderProps) => {
-  const { toast } = useToast();
-  const { user, logout, isAdmin } = useAuth();
-  
-  const handleNotificationClick = () => {
-    toast({
-      title: "Notificações",
-      description: "Você tem 3 novas notificações",
-    });
-  };
+// Menu items compartilhados com o Sidebar
+const adminMenuItems = [
+  { path: "/dashboard", label: "Dashboard Admin" },
+  { path: "/alunos", label: "Alunos" },
+  { path: "/cursos", label: "Cursos" },
+  { path: "/usuarios", label: "Usuários" },
+  { path: "/relatorios", label: "Relatórios" },
+];
 
-  const handleLogout = () => {
-    logout();
-    toast({
-      title: "Logout realizado",
-      description: "Você foi desconectado com sucesso",
-    });
-  };
+const alunoMenuItems = [
+  { path: "/", label: "Dashboard" },
+  { path: "/aulas", label: "Aulas" },
+  { path: "/calendario", label: "Calendário" },
+  { path: "/presenca", label: "Presença" },
+  { path: "/materiais", label: "Materiais" },
+  { path: "/certificado", label: "Certificado" },
+];
+
+export const Header = ({ toggleSidebar }: HeaderProps) => {
+  const { user, isAdmin } = useAuth();
+  const location = useLocation();
+
+  // Determina qual conjunto de itens do menu usar
+  const menuItems = isAdmin ? adminMenuItems : alunoMenuItems;
+
+  // Encontra o item atual do menu baseado na rota atual
+  const currentMenuItem = menuItems.find(
+    (item) =>
+      location.pathname === item.path ||
+      (item.path !== "/" && location.pathname.startsWith(item.path))
+  );
 
   return (
-    <header className="bg-white shadow-sm z-10 sticky top-0">
-      <div className="flex items-center justify-between p-4">
-        <div className="flex items-center">
-          <button 
-            id="sidebar-toggle" 
-            onClick={toggleSidebar}
-            className="toggle-button"
-            aria-label="Toggle navigation menu"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-          </button>
-          <h2 className="text-xl font-semibold ml-2">Dashboard</h2>
-        </div>
-        
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          <div className="relative">
-            <button 
-              className="p-2 rounded-full hover:bg-muted transition-colors"
-              onClick={handleNotificationClick}
-              aria-label="Notifications"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-              </svg>
-              <span className="notification-dot"></span>
-            </button>
+    <header className="sticky top-0 z-10 bg-white border-b h-14 min-h-[56px] flex items-center px-4 shadow-sm">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleSidebar}
+        className="mr-4 hover:bg-gray-100"
+      >
+        <Menu className="h-5 w-5" />
+      </Button>
+
+      <h1 className="text-xl font-semibold text-gray-800">
+        {currentMenuItem?.label || "ESCALI"}
+      </h1>
+
+      <div className="flex-1" />
+
+      <div className="flex items-center space-x-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative hover:bg-gray-100"
+        >
+          <Bell className="h-5 w-5" />
+          <span className="absolute -top-1 -right-1 w-2 h-2 bg-destructive rounded-full" />
+        </Button>
+
+        <div className="flex items-center space-x-2">
+          <div className="text-right mr-2">
+            <p className="text-sm font-medium truncate max-w-[150px]">
+              {user?.name || "Usuário"}
+            </p>
+            <p className="text-xs text-muted-foreground truncate max-w-[150px]">
+              {user?.email || "usuario@email.com"}
+            </p>
           </div>
-          
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              <img 
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.nome || '')}&background=3b82f6&color=fff`} 
-                alt="Profile" 
-                className="h-8 w-8 rounded-full"
-              />
-              <div className="ml-2 hidden sm:block">
-                <span className="font-medium text-sm">{user?.nome}</span>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    isAdmin ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {isAdmin ? 'Admin' : 'Aluno'}
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleLogout}
-              className="text-xs"
-            >
-              Sair
-            </Button>
+          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <span className="text-sm font-medium text-primary">
+              {user?.name?.[0]?.toUpperCase() || "U"}
+            </span>
           </div>
         </div>
       </div>

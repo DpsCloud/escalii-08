@@ -1,13 +1,10 @@
-
 export interface User {
   id: string;
-  nome: string;
-  cpf: string;
+  name: string;
   email: string;
-  tipoUsuario: 'admin' | 'instrutor';
-  telefone?: string;
-  dataNascimento?: string;
-  createdAt: string;
+  role: 'admin' | 'user' | 'instructor';
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface LoginResponse {
@@ -24,4 +21,21 @@ export interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   isInstructor: boolean;
+}
+
+export interface AuthState {
+  user: User | null;
+  token: string | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterData extends LoginCredentials {
+  name: string;
+  role?: 'admin' | 'user' | 'instructor';
 }

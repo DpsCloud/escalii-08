@@ -1,23 +1,36 @@
+/* Reset básico e correções de overflow */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  font-family: system-ui, sans-serif;
+  background-color: #f9fafb; /* Cor clara de fundo */
+}
+
+/* Centralização opcional e estilização principal */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
+/* Estilização da logo */
 .logo {
   height: 6em;
   padding: 1.5em;
+  transition: filter 300ms ease;
   will-change: filter;
-  transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
+/* Animação suave da logo */
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
@@ -33,10 +46,21 @@
   }
 }
 
+/* Cartão padrão */
 .card {
   padding: 2em;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
+/* Texto secundário */
 .read-the-docs {
   color: #888;
+  font-size: 0.875rem;
+}
+
+/* Oculta badge do Lovable se necessário */
+#lovable-badge {
+  display: none !important;
 }
