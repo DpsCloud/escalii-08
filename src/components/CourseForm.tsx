@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -88,7 +87,6 @@ export const CourseForm = ({ onClose, editingCourse }: CourseFormProps) => {
           inscricoesAbertas: false,
           alunosInscritos: 0,
           turmas: [],
-          aulas: [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };

@@ -7,13 +7,13 @@ import { BookOpen, Plus } from 'lucide-react';
 import { Course, Aula } from '@/types/course';
 import { AulaCard } from './AulaCard';
 import { AulaForm } from './AulaForm';
+import { useAulaStore } from '@/stores/useAulaStore';
 
 interface CourseSectionProps {
   course: Course;
   searchTerm: string;
   editingAula: Aula | undefined;
   aulaDialogOpen: boolean;
-  courses: Course[];
   onEditAula: (aula: Aula) => void;
   onCloseDialog: () => void;
   setAulaDialogOpen: (open: boolean) => void;
@@ -24,11 +24,12 @@ export const CourseSection = ({
   searchTerm,
   editingAula,
   aulaDialogOpen,
-  courses,
   onEditAula,
   onCloseDialog,
   setAulaDialogOpen
 }: CourseSectionProps) => {
+  const { getAulasByCurso } = useAulaStore();
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ativo': return 'bg-green-100 text-green-800';
@@ -39,12 +40,15 @@ export const CourseSection = ({
     }
   };
 
-  const filteredAulas = course.aulas
-    ?.filter(aula => 
+  // Get aulas for this course using the relationship
+  const cursoAulas = getAulasByCurso(course.id);
+  
+  const filteredAulas = cursoAulas
+    .filter(({ aula }) => 
       searchTerm === '' || 
       aula.titulo.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    .sort((a, b) => a.ordem - b.ordem) || [];
+    .sort((a, b) => a.relacao.ordem - b.relacao.ordem);
 
   return (
     <Card className="animate-fade-in">
@@ -67,30 +71,30 @@ export const CourseSection = ({
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredAulas.length > 0 ? (
-            filteredAulas.map((aula) => (
+            filteredAulas.map(({ aula }) => (
               <AulaCard
                 key={aula.id}
                 aula={aula}
                 onEdit={onEditAula}
+                showCategory={false}
+                showDelete={false}
               />
             ))
           ) : (
             <div className="col-span-full text-center py-8 text-gray-500">
               <BookOpen className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>Nenhuma aula cadastrada neste curso</p>
+              <p>Nenhuma aula associada a este curso</p>
               <Dialog open={aulaDialogOpen} onOpenChange={setAulaDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="mt-3" variant="outline" size="sm">
                     <Plus className="h-4 w-4 mr-2" />
-                    Adicionar primeira aula
+                    Associar primeira aula
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                   <AulaForm 
                     onClose={onCloseDialog} 
                     editingAula={editingAula}
-                    courses={courses}
-                    preSelectedCourse={course.id}
                   />
                 </DialogContent>
               </Dialog>

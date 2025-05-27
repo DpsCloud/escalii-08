@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Course } from '@/types/course';
@@ -56,35 +55,6 @@ const mockCourses: Course[] = [
         maxAulas: 8
       }
     ],
-    aulas: [
-      {
-        id: 'a1',
-        titulo: 'Fundamentos da Liderança Cristã',
-        descricao: 'Introdução aos princípios básicos da liderança bíblica',
-        cursoId: '1',
-        ordem: 1,
-        duracao: 90,
-        dataAula: '2025-05-05',
-        videoUrl: 'https://example.com/video1',
-        materiais: [],
-        status: 'concluida',
-        createdAt: '2025-01-15T10:00:00Z',
-        updatedAt: '2025-01-15T10:00:00Z'
-      },
-      {
-        id: 'a2',
-        titulo: 'Caráter do Líder',
-        descricao: 'Desenvolvimento do caráter cristão na liderança',
-        cursoId: '1',
-        ordem: 2,
-        duracao: 90,
-        dataAula: '2025-05-12',
-        materiais: [],
-        status: 'ativa',
-        createdAt: '2025-01-15T10:00:00Z',
-        updatedAt: '2025-01-15T10:00:00Z'
-      }
-    ],
     createdAt: '2025-01-15T10:00:00Z',
     updatedAt: '2025-01-20T15:30:00Z'
   },
@@ -103,7 +73,6 @@ const mockCourses: Course[] = [
     maxAlunos: 40,
     alunosInscritos: 0,
     turmas: [],
-    aulas: [],
     createdAt: '2025-01-15T10:00:00Z',
     updatedAt: '2025-01-15T10:00:00Z'
   },
@@ -135,21 +104,6 @@ const mockCourses: Course[] = [
         professorNome: 'Pastora Maria',
         aulas: 2,
         maxAulas: 4
-      }
-    ],
-    aulas: [
-      {
-        id: 'a3',
-        titulo: 'Atualização em Liderança',
-        descricao: 'Novas abordagens em liderança cristã',
-        cursoId: '3',
-        ordem: 1,
-        duracao: 60,
-        dataAula: '2025-06-05',
-        materiais: [],
-        status: 'ativa',
-        createdAt: '2025-01-10T14:00:00Z',
-        updatedAt: '2025-01-10T14:00:00Z'
       }
     ],
     createdAt: '2025-01-10T14:00:00Z',
