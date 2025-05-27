@@ -21,6 +21,9 @@ interface CourseFormProps {
 export const CourseForm = ({ onClose, editingCourse }: CourseFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [turmaCustomizada, setTurmaCustomizada] = useState(false);
+  const [customTipo, setCustomTipo] = useState('');
+  const [customAno, setCustomAno] = useState('');
+  const [customPeriodo, setCustomPeriodo] = useState('');
   const { addCourse, updateCourse } = useCourseStore();
   const { aulas } = useAulaStore();
 
@@ -167,30 +170,46 @@ export const CourseForm = ({ onClose, editingCourse }: CourseFormProps) => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* Tipo e Turma */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FormField
-              control={form.control}
-              name="tipo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo do Curso</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o tipo" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="capacitacao">Capacitação</SelectItem>
-                      <SelectItem value="revalidacao">Revalidação</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* Tipo do Curso */}
+          <FormField
+            control={form.control}
+            name="tipo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo do Curso</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="capacitacao">Capacitação</SelectItem>
+                    <SelectItem value="revalidacao">Revalidação</SelectItem>
+                    <SelectItem value="custom">Outro (Digite manualmente)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
+          {/* Campo customizado para tipo */}
+          {tipoValue === 'custom' && (
+            <FormItem>
+              <FormLabel>Tipo Customizado</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Digite o tipo do curso" 
+                  value={customTipo}
+                  onChange={(e) => setCustomTipo(e.target.value)}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+
+          {/* Ano e Período */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="ano"
@@ -207,6 +226,7 @@ export const CourseForm = ({ onClose, editingCourse }: CourseFormProps) => {
                       {ANOS_DISPONIVEIS.map((ano) => (
                         <SelectItem key={ano} value={ano}>{ano}</SelectItem>
                       ))}
+                      <SelectItem value="custom">Outro (Digite manualmente)</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -232,6 +252,7 @@ export const CourseForm = ({ onClose, editingCourse }: CourseFormProps) => {
                           {periodo === 'revalida' ? 'Revalidação' : `${periodo}º Período`}
                         </SelectItem>
                       ))}
+                      <SelectItem value="custom">Outro (Digite manualmente)</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -239,6 +260,33 @@ export const CourseForm = ({ onClose, editingCourse }: CourseFormProps) => {
               )}
             />
           </div>
+
+          {/* Campos customizados para ano e período */}
+          {anoValue === 'custom' && (
+            <FormItem>
+              <FormLabel>Ano Customizado</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Digite o ano" 
+                  value={customAno}
+                  onChange={(e) => setCustomAno(e.target.value)}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+
+          {periodoValue === 'custom' && (
+            <FormItem>
+              <FormLabel>Período Customizado</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Digite o período" 
+                  value={customPeriodo}
+                  onChange={(e) => setCustomPeriodo(e.target.value)}
+                />
+              </FormControl>
+            </FormItem>
+          )}
 
           {/* Turma customizada */}
           <div className="space-y-2">
@@ -318,15 +366,14 @@ export const CourseForm = ({ onClose, editingCourse }: CourseFormProps) => {
                           <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                             <FormControl>
                               <Checkbox
-                                checked={field.value?.includes(dia)}
+                                checked={field.value?.includes(dia) || false}
                                 onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([...field.value, dia])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== dia
-                                        )
-                                      )
+                                  const currentValue = field.value || [];
+                                  if (checked === true) {
+                                    field.onChange([...currentValue, dia]);
+                                  } else {
+                                    field.onChange(currentValue.filter((value) => value !== dia));
+                                  }
                                 }}
                               />
                             </FormControl>
@@ -362,15 +409,14 @@ export const CourseForm = ({ onClose, editingCourse }: CourseFormProps) => {
                           <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-2 border rounded hover:bg-gray-50">
                             <FormControl>
                               <Checkbox
-                                checked={field.value?.includes(aula.id)}
+                                checked={field.value?.includes(aula.id) || false}
                                 onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([...field.value, aula.id])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== aula.id
-                                        )
-                                      )
+                                  const currentValue = field.value || [];
+                                  if (checked === true) {
+                                    field.onChange([...currentValue, aula.id]);
+                                  } else {
+                                    field.onChange(currentValue.filter((value) => value !== aula.id));
+                                  }
                                 }}
                               />
                             </FormControl>

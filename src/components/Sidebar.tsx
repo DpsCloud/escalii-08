@@ -1,7 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useLocation, Link } from 'react-router-dom';
+
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { 
+  Home, 
+  Users, 
+  BookOpen, 
+  GraduationCap, 
+  Calendar, 
+  FileText, 
+  Award, 
+  Settings, 
+  BarChart3,
+  Menu,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  PlayCircle
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -9,177 +26,170 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
-  const isMobile = useIsMobile();
   const location = useLocation();
-  const { isAdmin, isAluno } = useAuth();
-  
-  // Close sidebar when clicking outside on mobile
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const sidebar = document.getElementById('sidebar');
-      const sidebarToggle = document.getElementById('sidebar-toggle');
-      
-      if (isMobile && isOpen && sidebar && 
-          !sidebar.contains(event.target as Node) && 
-          sidebarToggle && !sidebarToggle.contains(event.target as Node)) {
-        toggleSidebar();
-      }
-    };
+  const { user, isAdmin } = useAuth();
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen, toggleSidebar, isMobile]);
-
-  // Menu items para administradores - reordenado com Aulas antes de Cursos
-  const adminMenuItems = [
-    { path: '/dashboard', icon: <DashboardIcon />, label: 'Dashboard Admin' },
-    { path: '/alunos', icon: <UsersIcon />, label: 'Alunos' },
-    { path: '/aulas-admin', icon: <BookIcon />, label: 'Aulas' },
-    { path: '/cursos', icon: <BookOpenIcon />, label: 'Cursos' },
-    { path: '/usuarios', icon: <UserIcon />, label: 'Usuários' },
-    { path: '/relatorios', icon: <ReportsIcon />, label: 'Relatórios' }
+  const menuItems = [
+    { 
+      icon: Home, 
+      label: 'Dashboard', 
+      path: '/dashboard',
+      admin: false
+    },
+    { 
+      icon: PlayCircle, 
+      label: 'Aulas', 
+      path: '/aulas-admin',
+      admin: true
+    },
+    { 
+      icon: BookOpen, 
+      label: 'Cursos', 
+      path: '/cursos',
+      admin: false
+    },
+    { 
+      icon: Users, 
+      label: 'Alunos', 
+      path: '/alunos',
+      admin: true
+    },
+    { 
+      icon: Calendar, 
+      label: 'Calendário', 
+      path: '/calendario',
+      admin: false
+    },
+    { 
+      icon: FileText, 
+      label: 'Materiais', 
+      path: '/materiais',
+      admin: false
+    },
+    { 
+      icon: Award, 
+      label: 'Certificados', 
+      path: '/certificado',
+      admin: false
+    },
+    { 
+      icon: BarChart3, 
+      label: 'Relatórios', 
+      path: '/relatorios',
+      admin: true
+    },
+    { 
+      icon: Settings, 
+      label: 'Usuários', 
+      path: '/usuarios',
+      admin: true
+    }
   ];
 
-  // Menu items para alunos
-  const alunoMenuItems = [
-    { path: '/', icon: <HomeIcon />, label: 'Dashboard' },
-    { path: '/aulas', icon: <BookIcon />, label: 'Aulas' },
-    { path: '/calendario', icon: <CalendarIcon />, label: 'Calendário' },
-    { path: '/presenca', icon: <CheckCircleIcon />, label: 'Presença' },
-    { path: '/materiais', icon: <FileIcon />, label: 'Materiais' },
-    { path: '/certificado', icon: <CertificateIcon />, label: 'Certificado' }
-  ];
-
-  // Seleciona os itens do menu baseado no tipo de usuário
-  const menuItems = isAdmin ? adminMenuItems : alunoMenuItems;
+  const filteredMenuItems = menuItems.filter(item => !item.admin || isAdmin);
 
   return (
     <>
-      {/* Overlay for mobile */}
-      {isMobile && isOpen && (
-        <div className="mobile-menu-overlay" onClick={toggleSidebar} />
+      {/* Overlay para mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={toggleSidebar}
+        />
       )}
-      
+
       {/* Sidebar */}
-      <div 
-        id="sidebar" 
-        className={`sidebar gradient-bg text-white ${isOpen ? 'w-64' : isMobile ? 'w-0' : 'w-[70px]'}`}
-      >
-        <div className="p-4">
-          <div className={`flex items-center justify-center mb-8 ${!isOpen && !isMobile ? 'justify-center' : ''}`}>
-            {isOpen ? (
-              <h1 className="text-2xl font-bold">ESCALI</h1>
-            ) : !isMobile && (
-              <h1 className="text-2xl font-bold">E</h1>
+      <aside className={`
+        fixed top-0 left-0 z-50 h-full bg-white shadow-lg transition-all duration-300 ease-in-out
+        ${isOpen ? 'w-64' : 'w-[70px]'}
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b">
+            {isOpen && (
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <GraduationCap className="h-5 w-5 text-white" />
+                </div>
+                <span className="font-bold text-gray-800">ESCALI</span>
+              </div>
             )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSidebar}
+              className="lg:hidden"
+            >
+              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
           </div>
-          
-          <div className="space-y-1">
-            {menuItems.map((item) => (
-              <NavItem 
-                key={item.path}
-                to={item.path}
-                icon={item.icon}
-                label={item.label}
-                isActive={location.pathname === item.path}
-                isCollapsed={!isOpen && !isMobile}
-                onClick={isMobile ? toggleSidebar : undefined}
-              />
-            ))}
+
+          {/* Navigation */}
+          <nav className="flex-1 p-2 space-y-1">
+            {filteredMenuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.path;
+              
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`
+                    flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors
+                    ${isActive 
+                      ? 'bg-blue-100 text-blue-700 border-blue-200' 
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }
+                    ${!isOpen ? 'justify-center' : ''}
+                  `}
+                  title={!isOpen ? item.label : undefined}
+                >
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {isOpen && <span className="font-medium">{item.label}</span>}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* User Info */}
+          {isOpen && user && (
+            <div className="p-4 border-t">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-medium text-gray-600">
+                    {user.name?.charAt(0) || 'U'}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {user.name}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Toggle Button for Desktop */}
+          <div className="hidden lg:block p-2 border-t">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSidebar}
+              className="w-full justify-center"
+            >
+              {isOpen ? (
+                <ChevronLeft className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </Button>
           </div>
         </div>
-      </div>
+      </aside>
     </>
   );
 };
-
-interface NavItemProps {
-  to: string;
-  icon: React.ReactNode;
-  label: string;
-  isActive: boolean;
-  isCollapsed: boolean;
-  onClick?: () => void;
-}
-
-const NavItem = ({ to, icon, label, isActive, isCollapsed, onClick }: NavItemProps) => {
-  return (
-    <Link 
-      to={to}
-      onClick={onClick}
-      className={`sidebar-link flex items-center p-3 rounded-lg ${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center' : ''}`}
-    >
-      <span className="h-5 w-5 mr-3">{icon}</span>
-      {!isCollapsed && <span>{label}</span>}
-    </Link>
-  );
-};
-
-// Icons
-const HomeIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-  </svg>
-);
-
-const DashboardIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-  </svg>
-);
-
-const ReportsIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-  </svg>
-);
-
-const BookIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-  </svg>
-);
-
-const CalendarIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-  </svg>
-);
-
-const CheckCircleIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-  </svg>
-);
-
-const FileIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-  </svg>
-);
-
-const CertificateIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-  </svg>
-);
-
-const UsersIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-  </svg>
-);
-
-const BookOpenIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-  </svg>
-);
-
-const UserIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-  </svg>
-);

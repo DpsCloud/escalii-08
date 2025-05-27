@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { studentSchema, StudentFormData } from '@/schemas/studentSchema';
-import { useStudentStore } from '@/stores/useStudentStore';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { Student } from '@/types/student';
+import { useStudentStore } from '@/stores/useStudentStore';
+import { useCourseStore } from '@/stores/useCourseStore';
+import { studentSchema, StudentFormData } from '@/schemas/studentSchema';
 
 interface StudentFormProps {
   onClose: () => void;
@@ -19,6 +21,8 @@ interface StudentFormProps {
 export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addStudent, updateStudent } = useStudentStore();
+  const { getAllCourses } = useCourseStore();
+  const courses = getAllCourses();
 
   const form = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema),
@@ -50,65 +54,41 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
     }
   });
 
+  const [selectedCourse, setSelectedCourse] = useState(editingStudent?.curso || '');
+
   const onSubmit = async (data: StudentFormData) => {
     setIsSubmitting(true);
     
     try {
+      const studentData: Student = {
+        id: editingStudent?.id || Date.now().toString(),
+        nome: data.nome,
+        cpf: data.cpf,
+        email: data.email,
+        telefone: data.telefone,
+        dataNascimento: data.dataNascimento,
+        endereco: data.endereco,
+        curso: selectedCourse || undefined,
+        turma: editingStudent?.turma,
+        progresso: editingStudent?.progresso || 0,
+        status: data.status,
+        foto: editingStudent?.foto,
+        dataMatricula: editingStudent?.dataMatricula || new Date().toISOString().split('T')[0],
+        presencaGeral: editingStudent?.presencaGeral || 0,
+        aulasAssistidas: editingStudent?.aulasAssistidas || 0,
+        aproveitamento: editingStudent?.aproveitamento || 0,
+        certificadoDisponivel: editingStudent?.certificadoDisponivel || false,
+        observacoes: data.observacoes
+      };
+
       if (editingStudent) {
-        const updatedData: Partial<Student> = {
-          nome: data.nome,
-          cpf: data.cpf,
-          email: data.email,
-          telefone: data.telefone,
-          dataNascimento: data.dataNascimento,
-          endereco: data.endereco ? {
-            rua: data.endereco.rua,
-            numero: data.endereco.numero,
-            bairro: data.endereco.bairro,
-            cidade: data.endereco.cidade,
-            cep: data.endereco.cep,
-            estado: data.endereco.estado
-          } : undefined,
-          status: data.status,
-          observacoes: data.observacoes,
-          foto: editingStudent.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nome)}&background=3b82f6&color=fff`
-        };
-        
-        updateStudent(editingStudent.id, updatedData);
+        updateStudent(editingStudent.id, studentData);
         toast({
           title: "Aluno atualizado",
           description: "Os dados do aluno foram atualizados com sucesso.",
         });
       } else {
-        const newStudent: Student = {
-          id: Date.now().toString(),
-          nome: data.nome,
-          cpf: data.cpf,
-          telefone: data.telefone,
-          email: data.email,
-          dataNascimento: data.dataNascimento,
-          endereco: data.endereco ? {
-            rua: data.endereco.rua,
-            numero: data.endereco.numero,
-            bairro: data.endereco.bairro,
-            cidade: data.endereco.cidade,
-            cep: data.endereco.cep,
-            estado: data.endereco.estado
-          } : undefined,
-          curso: undefined,
-          turma: undefined,
-          progresso: 0,
-          status: data.status,
-          foto: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nome)}&background=3b82f6&color=fff`,
-          dataMatricula: new Date().toISOString().split('T')[0],
-          presencaGeral: 0,
-          aulasAssistidas: 0,
-          aproveitamento: 0,
-          certificadoDisponivel: false,
-          observacoes: data.observacoes
-        };
-        
-        addStudent(newStudent);
+        addStudent(studentData);
         toast({
           title: "Aluno criado",
           description: "O aluno foi criado com sucesso.",
@@ -127,24 +107,6 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
     }
   };
 
-  const formatCPF = (value: string) => {
-    const digits = value.replace(/\D/g, '');
-    return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  };
-
-  const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, '');
-    if (digits.length <= 10) {
-      return digits.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
-    }
-    return digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-  };
-
-  const formatCEP = (value: string) => {
-    const digits = value.replace(/\D/g, '');
-    return digits.replace(/(\d{5})(\d{3})/, '$1-$2');
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -158,114 +120,105 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="nome"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nome Completo</FormLabel>
-                <FormControl>
-                  <Input placeholder="Digite o nome completo" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="cpf"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CPF</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="000.000.000-00"
-                      {...field}
-                      onChange={(e) => {
-                        const formatted = formatCPF(e.target.value);
-                        field.onChange(formatted);
-                      }}
-                      maxLength={14}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="telefone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Telefone</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="(00) 00000-0000"
-                      {...field}
-                      onChange={(e) => {
-                        const formatted = formatPhone(e.target.value);
-                        field.onChange(formatted);
-                      }}
-                      maxLength={15}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="aluno@email.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="dataNascimento"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Data de Nascimento</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Endereço */}
-          <div className="space-y-4 p-4 border rounded-lg">
-            <h3 className="font-medium">Endereço</h3>
+          {/* Dados Pessoais */}
+          <div className="space-y-4">
+            <h3 className="text-md font-medium border-b pb-2">Dados Pessoais</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField
+              control={form.control}
+              name="nome"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome Completo</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Digite o nome completo" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="endereco.rua"
+                name="cpf"
                 render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Rua</FormLabel>
+                  <FormItem>
+                    <FormLabel>CPF</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nome da rua" {...field} />
+                      <Input placeholder="000.000.000-00" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="dataNascimento"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data de Nascimento</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="email@exemplo.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="telefone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telefone</FormLabel>
+                    <FormControl>
+                      <Input placeholder="(00) 00000-0000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Endereço */}
+          <div className="space-y-4">
+            <h3 className="text-md font-medium border-b pb-2">Endereço</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2">
+                <FormField
+                  control={form.control}
+                  name="endereco.rua"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rua</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome da rua" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
@@ -282,7 +235,7 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="endereco.bairro"
@@ -290,7 +243,7 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
                   <FormItem>
                     <FormLabel>Bairro</FormLabel>
                     <FormControl>
-                      <Input placeholder="Bairro" {...field} />
+                      <Input placeholder="Nome do bairro" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -304,7 +257,23 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
                   <FormItem>
                     <FormLabel>Cidade</FormLabel>
                     <FormControl>
-                      <Input placeholder="Cidade" {...field} />
+                      <Input placeholder="Nome da cidade" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="endereco.cep"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CEP</FormLabel>
+                    <FormControl>
+                      <Input placeholder="00000-000" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -325,56 +294,57 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="endereco.cep"
-              render={({ field }) => (
-                <FormItem className="md:w-1/3">
-                  <FormLabel>CEP</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="00000-000"
-                      {...field}
-                      onChange={(e) => {
-                        const formatted = formatCEP(e.target.value);
-                        field.onChange(formatted);
-                      }}
-                      maxLength={9}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="ativo">Ativo</SelectItem>
-                      <SelectItem value="pendente">Pendente</SelectItem>
-                      <SelectItem value="formado">Formado</SelectItem>
-                      <SelectItem value="inativo">Inativo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {/* Informações Acadêmicas */}
+          <div className="space-y-4">
+            <h3 className="text-md font-medium border-b pb-2">Informações Acadêmicas</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Curso</label>
+                <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um curso" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Nenhum curso</SelectItem>
+                    {courses.map((course) => (
+                      <SelectItem key={course.id} value={course.nome}>
+                        {course.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ativo">Ativo</SelectItem>
+                        <SelectItem value="pendente">Pendente</SelectItem>
+                        <SelectItem value="formado">Formado</SelectItem>
+                        <SelectItem value="inativo">Inativo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
 
+          {/* Observações */}
           <FormField
             control={form.control}
             name="observacoes"
@@ -382,7 +352,11 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
               <FormItem>
                 <FormLabel>Observações</FormLabel>
                 <FormControl>
-                  <Input placeholder="Observações adicionais (opcional)" {...field} />
+                  <Textarea 
+                    placeholder="Informações adicionais sobre o aluno"
+                    className="min-h-[80px]"
+                    {...field} 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
