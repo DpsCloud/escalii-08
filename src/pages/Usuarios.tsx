@@ -8,63 +8,54 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Eye, Edit, Trash2, Plus, Search, Filter } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useUserStore } from '@/stores/useUserStore';
+import { UserForm } from '@/components/UserForm';
+import { toast } from '@/components/ui/use-toast';
 
 const Usuarios = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
   const isMobile = useIsMobile();
   const { isAdmin } = useAuth();
+
+  const {
+    searchTerm,
+    filterType,
+    setSearchTerm,
+    setFilterType,
+    getFilteredUsuarios,
+    deleteUsuario
+  } = useUserStore();
+
+  const filteredUsuarios = getFilteredUsuarios();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Mock data - em produção viria da API
-  const usuarios = [
-    {
-      id: '1',
-      nome: 'Maria Souza',
-      cpf: '111.111.111-11',
-      email: 'maria@escali.com',
-      tipoUsuario: 'admin',
-      telefone: '(11) 99999-9999',
-      status: 'ativo',
-      ultimoAcesso: '2024-01-15'
-    },
-    {
-      id: '2',
-      nome: 'João Santos',
-      cpf: '222.222.222-22',
-      email: 'joao@escali.com',
-      tipoUsuario: 'instrutor',
-      telefone: '(11) 88888-8888',
-      status: 'ativo',
-      ultimoAcesso: '2024-01-14'
-    },
-    {
-      id: '3',
-      nome: 'Ana Costa',
-      cpf: '333.333.333-33',
-      email: 'ana@escali.com',
-      tipoUsuario: 'instrutor',
-      telefone: '(11) 77777-7777',
-      status: 'inativo',
-      ultimoAcesso: '2024-01-10'
-    }
-  ];
+  const handleEdit = (usuario: any) => {
+    setEditingUser(usuario);
+    setIsFormOpen(true);
+  };
 
-  const filteredUsuarios = usuarios.filter(usuario => {
-    const matchesSearch = usuario.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         usuario.cpf.includes(searchTerm) ||
-                         usuario.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesFilter = filterType === 'all' || usuario.tipoUsuario === filterType;
-    
-    return matchesSearch && matchesFilter;
-  });
+  const handleDelete = (usuario: any) => {
+    if (window.confirm(`Tem certeza que deseja excluir o usuário ${usuario.nome}?`)) {
+      deleteUsuario(usuario.id);
+      toast({
+        title: "Usuário excluído",
+        description: "O usuário foi excluído com sucesso.",
+      });
+    }
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setEditingUser(null);
+  };
 
   if (!isAdmin) {
     return (
@@ -92,7 +83,10 @@ const Usuarios = () => {
                 <p className="text-sm sm:text-base text-gray-600">Gerencie administradores e instrutores do sistema</p>
               </div>
               
-              <Button className="flex items-center gap-2">
+              <Button 
+                className="flex items-center gap-2"
+                onClick={() => setIsFormOpen(true)}
+              >
                 <Plus className="h-4 w-4" />
                 Novo Usuário
               </Button>
@@ -166,10 +160,19 @@ const Usuarios = () => {
                           <Button variant="ghost" size="sm">
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEdit(usuario)}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => handleDelete(usuario)}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -188,6 +191,17 @@ const Usuarios = () => {
           </div>
         </main>
       </div>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
+            </DialogTitle>
+          </DialogHeader>
+          <UserForm onClose={handleCloseForm} editingUser={editingUser} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
