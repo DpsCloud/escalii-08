@@ -9,80 +9,63 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Eye, Edit, Trash2, Plus, Search, Phone, User } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { useStudentStore } from '@/stores/useStudentStore';
+import { StudentForm } from '@/components/StudentForm';
+import { StudentDetailsModal } from '@/components/StudentDetailsModal';
+import { toast } from '@/components/ui/use-toast';
 
 const Alunos = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [showStudentForm, setShowStudentForm] = useState(false);
+  const [showStudentDetails, setShowStudentDetails] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<any>(null);
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const isMobile = useIsMobile();
   const { isAdmin } = useAuth();
+
+  const { 
+    getFilteredStudents, 
+    searchTerm, 
+    setSearchTerm, 
+    filterStatus, 
+    setFilterStatus,
+    deleteStudent 
+  } = useStudentStore();
+
+  const students = getFilteredStudents();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Mock data - em produção viria da API
-  const alunos = [
-    {
-      id: '1',
-      nome: 'João Silva',
-      cpf: '111.111.111-11',
-      telefone: '(11) 99999-9999',
-      email: 'joao@email.com',
-      dataNascimento: '1990-05-15',
-      curso: 'ESCALI 2025.1',
-      turma: 'Turma A',
-      progresso: 75,
-      status: 'ativo',
-      foto: 'https://ui-avatars.com/api/?name=João+Silva&background=3b82f6&color=fff'
-    },
-    {
-      id: '2',
-      nome: 'Maria Santos',
-      cpf: '222.222.222-22',
-      telefone: '(11) 88888-8888',
-      email: 'maria@email.com',
-      dataNascimento: '1988-03-20',
-      curso: 'ESCALI 2025.1',
-      turma: 'Turma A',
-      progresso: 62,
-      status: 'ativo',
-      foto: 'https://ui-avatars.com/api/?name=Maria+Santos&background=ec4899&color=fff'
-    },
-    {
-      id: '3',
-      nome: 'Pedro Costa',
-      cpf: '333.333.333-33',
-      telefone: '(11) 77777-7777',
-      email: 'pedro@email.com',
-      dataNascimento: '1992-08-10',
-      curso: null,
-      turma: null,
-      progresso: 0,
-      status: 'pendente',
-      foto: 'https://ui-avatars.com/api/?name=Pedro+Costa&background=10b981&color=fff'
-    },
-    {
-      id: '4',
-      nome: 'Ana Oliveira',
-      cpf: '444.444.444-44',
-      telefone: '(11) 66666-6666',
-      email: 'ana@email.com',
-      dataNascimento: '1985-12-03',
-      curso: 'ESCALI 2024.2',
-      turma: 'Turma B',
-      progresso: 100,
-      status: 'formado',
-      foto: 'https://ui-avatars.com/api/?name=Ana+Oliveira&background=f59e0b&color=fff'
-    }
-  ];
+  const handleAddStudent = () => {
+    setEditingStudent(null);
+    setShowStudentForm(true);
+  };
 
-  const filteredAlunos = alunos.filter(aluno =>
-    aluno.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    aluno.cpf.includes(searchTerm) ||
-    aluno.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleEditStudent = (student: any) => {
+    setEditingStudent(student);
+    setShowStudentForm(true);
+  };
+
+  const handleViewStudent = (student: any) => {
+    setSelectedStudent(student);
+    setShowStudentDetails(true);
+  };
+
+  const handleDeleteStudent = (student: any) => {
+    if (window.confirm(`Tem certeza que deseja excluir o aluno ${student.nome}?`)) {
+      deleteStudent(student.id);
+      toast({
+        title: "Aluno excluído",
+        description: "O aluno foi excluído com sucesso.",
+      });
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -120,7 +103,7 @@ const Alunos = () => {
               </div>
               
               {isAdmin && (
-                <Button className="flex items-center gap-2">
+                <Button onClick={handleAddStudent} className="flex items-center gap-2">
                   <Plus className="h-4 w-4" />
                   Novo Aluno
                 </Button>
@@ -141,38 +124,55 @@ const Alunos = () => {
                     className="pl-10"
                   />
                 </div>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="w-full sm:w-48">
+                    <SelectValue placeholder="Filtrar por status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os status</SelectItem>
+                    <SelectItem value="ativo">Ativo</SelectItem>
+                    <SelectItem value="pendente">Pendente</SelectItem>
+                    <SelectItem value="formado">Formado</SelectItem>
+                    <SelectItem value="inativo">Inativo</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             {/* Versão Mobile - Cards */}
             <div className="md:hidden space-y-4">
-              {filteredAlunos.map((aluno) => (
-                <div key={aluno.id} className="border rounded-lg p-4 space-y-3">
+              {students.map((student) => (
+                <div key={student.id} className="border rounded-lg p-4 space-y-3">
                   <div className="flex items-center space-x-3">
                     <Avatar className="h-12 w-12">
-                      <AvatarImage src={aluno.foto} alt={aluno.nome} />
+                      <AvatarImage src={student.foto} alt={student.nome} />
                       <AvatarFallback>
-                        {aluno.nome.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                        {student.nome.split(' ').map(n => n[0]).join('').substring(0, 2)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <h3 className="font-semibold">{aluno.nome}</h3>
-                      <p className="text-sm text-gray-600">{aluno.cpf}</p>
+                      <button 
+                        onClick={() => handleViewStudent(student)}
+                        className="text-left hover:text-blue-600 transition-colors"
+                      >
+                        <h3 className="font-semibold">{student.nome}</h3>
+                      </button>
+                      <p className="text-sm text-gray-600">{student.cpf}</p>
                     </div>
-                    <Badge className={getStatusColor(aluno.status)}>
-                      {getStatusText(aluno.status)}
+                    <Badge className={getStatusColor(student.status)}>
+                      {getStatusText(student.status)}
                     </Badge>
                   </div>
                   
                   <div className="space-y-2">
                     <div className="flex items-center text-sm text-gray-600">
                       <Phone className="h-4 w-4 mr-2" />
-                      {aluno.telefone}
+                      {student.telefone}
                     </div>
-                    {aluno.curso && (
+                    {student.curso && (
                       <div className="flex items-center text-sm text-gray-600">
                         <User className="h-4 w-4 mr-2" />
-                        {aluno.curso} - {aluno.turma}
+                        {student.curso} - {student.turma}
                       </div>
                     )}
                   </div>
@@ -180,23 +180,38 @@ const Alunos = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Progresso do Curso</span>
-                      <span>{aluno.progresso}%</span>
+                      <span>{student.progresso}%</span>
                     </div>
-                    <Progress value={aluno.progresso} className="h-2" />
+                    <Progress value={student.progresso} className="h-2" />
                   </div>
 
                   <div className="flex gap-2 pt-2">
-                    <Button variant="ghost" size="sm" className="flex-1">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleViewStudent(student)}
+                    >
                       <Eye className="h-4 w-4 mr-1" />
                       Ver
                     </Button>
                     {isAdmin && (
                       <>
-                        <Button variant="ghost" size="sm" className="flex-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => handleEditStudent(student)}
+                        >
                           <Edit className="h-4 w-4 mr-1" />
                           Editar
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleDeleteStudent(student)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </>
@@ -221,29 +236,34 @@ const Alunos = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAlunos.map((aluno) => (
-                    <TableRow key={aluno.id}>
+                  {students.map((student) => (
+                    <TableRow key={student.id}>
                       <TableCell className="font-medium">
                         <div className="flex items-center space-x-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={aluno.foto} alt={aluno.nome} />
+                            <AvatarImage src={student.foto} alt={student.nome} />
                             <AvatarFallback>
-                              {aluno.nome.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                              {student.nome.split(' ').map(n => n[0]).join('').substring(0, 2)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <div className="font-medium">{aluno.nome}</div>
-                            <div className="text-sm text-gray-500">{aluno.email}</div>
+                            <button 
+                              onClick={() => handleViewStudent(student)}
+                              className="font-medium hover:text-blue-600 transition-colors text-left"
+                            >
+                              {student.nome}
+                            </button>
+                            <div className="text-sm text-gray-500">{student.email}</div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{aluno.cpf}</TableCell>
-                      <TableCell>{aluno.telefone}</TableCell>
+                      <TableCell>{student.cpf}</TableCell>
+                      <TableCell>{student.telefone}</TableCell>
                       <TableCell>
-                        {aluno.curso ? (
+                        {student.curso ? (
                           <div>
-                            <div className="font-medium">{aluno.curso}</div>
-                            <div className="text-sm text-gray-500">{aluno.turma}</div>
+                            <div className="font-medium">{student.curso}</div>
+                            <div className="text-sm text-gray-500">{student.turma}</div>
                           </div>
                         ) : (
                           <span className="text-gray-500">Sem curso</span>
@@ -252,27 +272,40 @@ const Alunos = () => {
                       <TableCell>
                         <div className="space-y-1">
                           <div className="flex justify-between text-sm">
-                            <span>{aluno.progresso}%</span>
+                            <span>{student.progresso}%</span>
                           </div>
-                          <Progress value={aluno.progresso} className="h-2" />
+                          <Progress value={student.progresso} className="h-2" />
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getStatusColor(aluno.status)}>
-                          {getStatusText(aluno.status)}
+                        <Badge className={getStatusColor(student.status)}>
+                          {getStatusText(student.status)}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleViewStudent(student)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                           {isAdmin && (
                             <>
-                              <Button variant="ghost" size="sm">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleEditStudent(student)}
+                              >
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-red-600 hover:text-red-700"
+                                onClick={() => handleDeleteStudent(student)}
+                              >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </>
@@ -285,7 +318,7 @@ const Alunos = () => {
               </Table>
             </div>
 
-            {filteredAlunos.length === 0 && (
+            {students.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-gray-500">Nenhum aluno encontrado</p>
               </div>
@@ -293,6 +326,28 @@ const Alunos = () => {
           </div>
         </main>
       </div>
+
+      {/* Modal de Formulário */}
+      <Dialog open={showStudentForm} onOpenChange={setShowStudentForm}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <StudentForm 
+            onClose={() => setShowStudentForm(false)}
+            editingStudent={editingStudent}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Detalhes */}
+      <Dialog open={showStudentDetails} onOpenChange={setShowStudentDetails}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Aluno</DialogTitle>
+          </DialogHeader>
+          {selectedStudent && (
+            <StudentDetailsModal student={selectedStudent} />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
