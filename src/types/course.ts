@@ -1,3 +1,4 @@
+
 export type TipoCurso = 'capacitacao' | 'revalidacao' | 'custom';
 export type AnoDisponivel = '2024' | '2025' | '2026' | '2027' | 'custom';
 export type PeriodoDisponivel = '1' | '2' | '3' | '4' | 'revalida' | 'custom';
@@ -6,6 +7,54 @@ export const ANOS_DISPONIVEIS: AnoDisponivel[] = ['2024', '2025', '2026', '2027'
 export const PERIODOS_DISPONIVEIS: PeriodoDisponivel[] = ['1', '2', '3', '4', 'revalida'];
 export const DIAS_SEMANA = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'] as const;
 export type DiaSemana = typeof DIAS_SEMANA[number];
+
+export interface Material {
+  id: string;
+  nome: string;
+  tipo: 'pdf' | 'video' | 'link' | 'documento';
+  url: string;
+  descricao?: string;
+  aulaId: string;
+}
+
+export interface Aula {
+  id: string;
+  titulo: string;
+  descricao: string;
+  duracao: number;
+  videoUrl?: string;
+  materiais?: Material[];
+  status: 'planejada' | 'ativa' | 'concluida';
+  categoria?: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CursoAula {
+  id: string;
+  cursoId: string;
+  aulaId: string;
+  ordem: number;
+  dataAula: string;
+  obrigatoria: boolean;
+  createdAt: string;
+}
+
+export interface Turma {
+  id: string;
+  nome: string;
+  cursoId: string;
+  status: string;
+  alunos: number;
+  maxAlunos: number;
+  dataInicio: string;
+  dataFim: string;
+  professorId: string;
+  professorNome: string;
+  aulas: number;
+  maxAulas: number;
+}
 
 export interface Course {
   id: string;
@@ -25,7 +74,7 @@ export interface Course {
   alunosInscritos: number;
   diasSemana: DiaSemana[];
   aulasSelecionadas: string[];
-  turmas: string[];
+  turmas: Turma[];
   createdAt: string;
   updatedAt: string;
 }

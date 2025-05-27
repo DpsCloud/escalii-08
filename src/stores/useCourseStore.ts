@@ -79,7 +79,7 @@ const mockCourses: Course[] = [
     inscricoesAbertas: false,
     maxAlunos: 40,
     alunosInscritos: 0,
-    diasSemana: ['terça', 'quinta'],
+    diasSemana: ['terca', 'quinta'],
     aulasSelecionadas: [],
     turmas: [],
     createdAt: '2025-01-15T10:00:00Z',
@@ -101,7 +101,7 @@ const mockCourses: Course[] = [
     inscricoesAbertas: true,
     maxAlunos: 20,
     alunosInscritos: 12,
-    diasSemana: ['sábado'],
+    diasSemana: ['sabado'],
     aulasSelecionadas: ['1', '2', '3', '4'],
     turmas: [
       {

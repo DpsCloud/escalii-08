@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,13 +31,13 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
       email: editingStudent.email,
       telefone: editingStudent.telefone,
       dataNascimento: editingStudent.dataNascimento,
-      endereco: editingStudent.endereco || {
-        rua: '',
-        numero: '',
-        bairro: '',
-        cidade: '',
-        cep: '',
-        estado: ''
+      endereco: {
+        rua: editingStudent.endereco?.rua || '',
+        numero: editingStudent.endereco?.numero || '',
+        bairro: editingStudent.endereco?.bairro || '',
+        cidade: editingStudent.endereco?.cidade || '',
+        cep: editingStudent.endereco?.cep || '',
+        estado: editingStudent.endereco?.estado || ''
       },
       status: editingStudent.status,
       observacoes: editingStudent.observacoes || ''

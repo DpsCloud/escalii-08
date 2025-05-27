@@ -166,7 +166,7 @@ export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
                     {user.email}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
-                    {user.role}
+                    {isAdmin ? 'Administrador' : 'Usuário'}
                   </p>
                 </div>
               </div>
