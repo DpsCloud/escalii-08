@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
@@ -5,7 +6,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, BookOpen, Calendar, GraduationCap, TrendingUp, CheckCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Users, BookOpen, Calendar, GraduationCap, TrendingUp, CheckCircle, UserCheck, Download, MessageSquare, Cake } from 'lucide-react';
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -16,54 +18,71 @@ const Dashboard = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Mock data para o dashboard do administrador
+  const dashboardData = {
+    visaoGeral: {
+      alunosCadastrados: 156,
+      professoresAtivos: 8,
+      turmasAtivas: 3,
+      turmasInativas: 2
+    },
+    engajamento: {
+      downloadsMateriais: 342,
+      comentariosPorAula: 128
+    },
+    aniversariantes: [
+      { nome: 'João Silva', data: '15 Jun' },
+      { nome: 'Maria Santos', data: '18 Jun' },
+      { nome: 'Pedro Costa', data: '22 Jun' }
+    ]
+  };
+
   const cards = [
     {
-      title: "Progresso do Curso",
-      value: "62%",
-      description: "5/8 Aulas",
-      icon: <TrendingUp className="h-4 w-4 text-muted-foreground" />
+      title: "Alunos Cadastrados",
+      value: dashboardData.visaoGeral.alunosCadastrados.toString(),
+      description: "Total de alunos no sistema",
+      icon: <Users className="h-4 w-4 text-muted-foreground" />,
+      color: "text-blue-600"
     },
     {
-      title: "Presença",
-      value: "100%",
-      description: "5 aulas assistidas",
-      icon: <CheckCircle className="h-4 w-4 text-muted-foreground" />
+      title: "Professores Ativos",
+      value: dashboardData.visaoGeral.professoresAtivos.toString(),
+      description: "Professores em atividade",
+      icon: <UserCheck className="h-4 w-4 text-muted-foreground" />,
+      color: "text-green-600"
     },
     {
-      title: "Próxima Aula",
-      value: "Aula 6",
-      description: "9 Dimensões da Imaturidade",
-      icon: <Calendar className="h-4 w-4 text-muted-foreground" />
+      title: "Turmas Ativas",
+      value: dashboardData.visaoGeral.turmasAtivas.toString(),
+      description: `${dashboardData.visaoGeral.turmasInativas} turmas inativas`,
+      icon: <BookOpen className="h-4 w-4 text-muted-foreground" />,
+      color: "text-purple-600"
     },
     {
-      title: "Certificado",
-      value: "Em andamento",
-      description: "3 aulas restantes",
-      icon: <GraduationCap className="h-4 w-4 text-muted-foreground" />
+      title: "Downloads Materiais",
+      value: dashboardData.engajamento.downloadsMateriais.toString(),
+      description: "Este mês",
+      icon: <Download className="h-4 w-4 text-muted-foreground" />,
+      color: "text-orange-600"
     }
   ];
 
-  const aulas = [
-    {
-      data: "JUN 15",
-      hora: "19:30",
-      titulo: "9 Dimensões da Imaturidade",
-      numero: 6
-    },
-    {
-      data: "JUN 22",
-      hora: "19:30",
-      titulo: "Propósito da Mesa",
-      numero: 7
-    }
+  const turmasStatus = [
+    { nome: 'ESCALI 2025.1', status: 'ativa', alunos: 35, aulas: 6 },
+    { nome: 'ESCALI 2025.2', status: 'planejada', alunos: 0, aulas: 0 },
+    { nome: 'Revalidação 2025.1', status: 'ativa', alunos: 12, aulas: 2 },
+    { nome: 'ESCALI 2024.2', status: 'finalizada', alunos: 28, aulas: 8 }
   ];
 
-  const modulos = [
-    { nome: "Módulo 1: Fundamentos", progresso: 100 },
-    { nome: "Módulo 2: Liderança", progresso: 75 },
-    { nome: "Módulo 3: Comunicação", progresso: 40 },
-    { nome: "Módulo 4: Gestão", progresso: 0 }
-  ];
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'ativa': return 'bg-green-100 text-green-800';
+      case 'planejada': return 'bg-blue-100 text-blue-800';
+      case 'finalizada': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   if (!isAdmin) {
     return (
@@ -85,77 +104,132 @@ const Dashboard = () => {
       }`}>
         <Header toggleSidebar={toggleSidebar} />
         
-        <main className="flex-1 overflow-y-auto p-0 sm:p-4 md:p-6">
-          <div className="max-w-7xl mx-auto px-4 space-y-6 w-full">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">Dashboard</h1>
-              <p className="text-sm sm:text-base text-gray-600">Bem-vindo ao seu dashboard do curso ESCALI</p>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="max-w-7xl mx-auto space-y-6 w-full">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">Dashboard Administrativo</h1>
+                <p className="text-sm sm:text-base text-gray-600">Visão geral do sistema ESCALI</p>
+              </div>
+              <Button>
+                <Calendar className="h-4 w-4 mr-2" />
+                Ver Relatórios Completos
+              </Button>
             </div>
 
+            {/* Cards de métricas principais */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {cards.map((card, index) => (
-                <Card key={index} className="w-full min-w-[200px]">
+                <Card key={index} className="w-full">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
                     {card.icon}
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{card.value}</div>
+                    <div className={`text-2xl font-bold ${card.color}`}>{card.value}</div>
                     <p className="text-xs text-muted-foreground">{card.description}</p>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <Card className="w-full min-w-[300px]">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Status das Turmas */}
+              <Card className="lg:col-span-2">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Próximas Aulas</CardTitle>
-                    <Button variant="outline" size="sm">Ver todas</Button>
+                    <CardTitle>Status das Turmas</CardTitle>
+                    <Button variant="outline" size="sm">Gerenciar</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {aulas.map((aula, index) => (
-                      <div key={index} className="flex items-center space-x-4 p-3 bg-muted/50 rounded-lg">
-                        <div className="flex-shrink-0 w-16 text-center">
-                          <div className="text-sm font-semibold">{aula.data}</div>
-                          <div className="text-xs text-muted-foreground">{aula.hora}</div>
+                    {turmasStatus.map((turma, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium">{turma.nome}</h4>
+                          <p className="text-xs text-muted-foreground">
+                            {turma.alunos} alunos • {turma.aulas} aulas
+                          </p>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium truncate">{aula.titulo}</h4>
-                          <p className="text-xs text-muted-foreground">Aula {aula.numero}</p>
-                        </div>
-                        <Button variant="outline" size="sm" className="flex-shrink-0">
-                          Detalhes
-                        </Button>
+                        <Badge className={getStatusColor(turma.status)}>
+                          {turma.status}
+                        </Badge>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="w-full min-w-[300px]">
+              {/* Aniversariantes */}
+              <Card>
                 <CardHeader>
-                  <CardTitle>Progresso do Curso</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Cake className="h-4 w-4" />
+                    Aniversariantes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {dashboardData.aniversariantes.map((aniversariante, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{aniversariante.nome}</span>
+                        <span className="text-xs text-muted-foreground">{aniversariante.data}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Engajamento e Atividades Recentes */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Métricas de Engajamento</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {modulos.map((modulo, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="font-medium text-gray-700 truncate pr-2">{modulo.nome}</span>
-                          <span className="font-medium whitespace-nowrap">{modulo.progresso}%</span>
-                        </div>
-                        <div className="w-full bg-muted rounded-full h-2">
-                          <div
-                            className="bg-primary h-2 rounded-full transition-all"
-                            style={{ width: `${modulo.progresso}%` }}
-                          />
-                        </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Download className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm">Downloads de Materiais</span>
                       </div>
-                    ))}
+                      <span className="font-bold text-blue-600">{dashboardData.engajamento.downloadsMateriais}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4 text-green-600" />
+                        <span className="text-sm">Comentários por Aula</span>
+                      </div>
+                      <span className="font-bold text-green-600">{dashboardData.engajamento.comentariosPorAula}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ações Rápidas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <Button className="w-full justify-start" variant="outline">
+                      <Users className="h-4 w-4 mr-2" />
+                      Cadastrar Novo Aluno
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Criar Nova Turma
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Agendar Aula
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Gerar Relatório
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
