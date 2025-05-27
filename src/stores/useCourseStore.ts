@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Course } from '@/types/course';
@@ -23,13 +24,15 @@ interface CourseStore {
   getAllCourses: () => Course[];
 }
 
-// Dados mock atualizados com terminologia padronizada
+// Dados mock atualizados com nova estrutura
 const mockCourses: Course[] = [
   {
     id: '1',
     nome: 'ESCALI Capacitação de Líderes 2025.1',
     descricao: 'Curso de capacitação para desenvolvimento de líderes cristãos da turma 2025.1. Este curso aborda os fundamentos da liderança bíblica, desenvolvimento de caráter e habilidades práticas para o ministério.',
     tipo: 'capacitacao',
+    ano: '2025',
+    periodo: '1',
     turma: '2025.1',
     dataInicio: '2025-05-01',
     dataFim: '2025-07-30',
@@ -39,6 +42,8 @@ const mockCourses: Course[] = [
     inscricoesAbertas: true,
     maxAlunos: 40,
     alunosInscritos: 35,
+    diasSemana: ['segunda', 'quarta', 'sexta'],
+    aulasSelecionadas: ['1', '2', '3', '4', '5', '6', '7', '8'],
     turmas: [
       {
         id: 't1',
@@ -63,6 +68,8 @@ const mockCourses: Course[] = [
     nome: 'ESCALI Capacitação de Líderes 2025.2',
     descricao: 'Curso de capacitação para desenvolvimento de líderes cristãos da turma 2025.2. Este curso aborda os fundamentos da liderança bíblica, desenvolvimento de caráter e habilidades práticas para o ministério.',
     tipo: 'capacitacao',
+    ano: '2025',
+    periodo: '2',
     turma: '2025.2',
     dataInicio: '2025-08-01',
     dataFim: '2025-10-30',
@@ -72,16 +79,20 @@ const mockCourses: Course[] = [
     inscricoesAbertas: false,
     maxAlunos: 40,
     alunosInscritos: 0,
+    diasSemana: ['terça', 'quinta'],
+    aulasSelecionadas: [],
     turmas: [],
     createdAt: '2025-01-15T10:00:00Z',
     updatedAt: '2025-01-15T10:00:00Z'
   },
   {
     id: '3',
-    nome: 'ESCALI Revalidação 2025.1',
-    descricao: 'Curso de revalidação para líderes já capacitados da turma 2025.1. Atualização e aprofundamento dos conceitos de liderança cristã, com foco em novos desafios e metodologias.',
+    nome: 'ESCALI Revalidação 2025.revalida',
+    descricao: 'Curso de revalidação para líderes já capacitados da turma 2025.revalida. Atualização e aprofundamento dos conceitos de liderança cristã, com foco em novos desafios e metodologias.',
     tipo: 'revalidacao',
-    turma: '2025.1',
+    ano: '2025',
+    periodo: 'revalida',
+    turma: '2025.revalida',
     dataInicio: '2025-06-01',
     dataFim: '2025-06-30',
     totalAulas: 4,
@@ -90,6 +101,8 @@ const mockCourses: Course[] = [
     inscricoesAbertas: true,
     maxAlunos: 20,
     alunosInscritos: 12,
+    diasSemana: ['sábado'],
+    aulasSelecionadas: ['1', '2', '3', '4'],
     turmas: [
       {
         id: 't2',

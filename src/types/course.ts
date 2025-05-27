@@ -3,7 +3,14 @@ export type TipoCurso = 'capacitacao' | 'revalidacao';
 export type StatusCurso = 'planejado' | 'ativo' | 'finalizado' | 'cancelado';
 export type StatusTurma = 'ativa' | 'inativa' | 'finalizada';
 
-// Turmas padronizadas disponíveis no sistema
+// Anos e períodos disponíveis
+export const ANOS_DISPONIVEIS = ['2024', '2025', '2026', '2027'] as const;
+export const PERIODOS_DISPONIVEIS = ['1', '2', '3', '4', 'revalida'] as const;
+
+export type AnoDisponivel = typeof ANOS_DISPONIVEIS[number];
+export type PeriodoDisponivel = typeof PERIODOS_DISPONIVEIS[number];
+
+// Turmas padronizadas disponíveis no sistema (mantidas para compatibilidade)
 export const TURMAS_DISPONIVEIS = [
   '2024.1',
   '2024.2', 
@@ -22,15 +29,19 @@ export interface Course {
   nome: string;
   descricao: string;
   tipo: TipoCurso;
-  turma: TurmaDisponivel;
+  ano: AnoDisponivel;
+  periodo: PeriodoDisponivel;
+  turma: string; // Gerado automaticamente ou customizado
   dataInicio: string;
   dataFim: string;
   totalAulas: number;
-  cargaHoraria: number;
+  cargaHoraria: number; // Calculado automaticamente
   status: StatusCurso;
   inscricoesAbertas: boolean;
   maxAlunos: number;
   alunosInscritos: number;
+  diasSemana: string[]; // Ex: ['segunda', 'quarta', 'sexta']
+  aulasSelecionadas: string[]; // IDs das aulas selecionadas
   turmas: Turma[];
   createdAt: string;
   updatedAt: string;
@@ -88,17 +99,21 @@ export interface Material {
 }
 
 // Funções para geração automática padronizada
-export const gerarNomeCurso = (tipo: TipoCurso, turma: TurmaDisponivel): string => {
+export const gerarNomeCurso = (tipo: TipoCurso, turma: string): string => {
   const tipoTexto = tipo === 'capacitacao' ? 'Capacitação de Líderes' : 'Revalidação';
   return `ESCALI ${tipoTexto} ${turma}`;
 };
 
-export const gerarDescricaoCurso = (tipo: TipoCurso, turma: TurmaDisponivel): string => {
+export const gerarDescricaoCurso = (tipo: TipoCurso, turma: string): string => {
   if (tipo === 'capacitacao') {
     return `Curso de capacitação para desenvolvimento de líderes cristãos da turma ${turma}. Este curso aborda os fundamentos da liderança bíblica, desenvolvimento de caráter e habilidades práticas para o ministério.`;
   } else {
     return `Curso de revalidação para líderes já capacitados da turma ${turma}. Atualização e aprofundamento dos conceitos de liderança cristã, com foco em novos desafios e metodologias.`;
   }
+};
+
+export const gerarTurma = (ano: AnoDisponivel, periodo: PeriodoDisponivel): string => {
+  return `${ano}.${periodo}`;
 };
 
 export const validarTipoCurso = (tipo: string): tipo is TipoCurso => {
@@ -132,3 +147,15 @@ export const getStatusTexto = (status: StatusCurso): string => {
     default: return status;
   }
 };
+
+export const DIAS_SEMANA = [
+  'segunda',
+  'terça',
+  'quarta',
+  'quinta',
+  'sexta',
+  'sábado',
+  'domingo'
+] as const;
+
+export type DiaSemana = typeof DIAS_SEMANA[number];
