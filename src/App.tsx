@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/sonner';
@@ -13,6 +14,7 @@ import Cursos from '@/pages/Cursos';
 import Usuarios from '@/pages/Usuarios';
 import Relatorios from '@/pages/Relatorios';
 import Aulas from '@/pages/Aulas';
+import AulasAdmin from '@/pages/AulasAdmin';
 import AulaDetalhes from '@/pages/AulaDetalhes';
 import Calendario from '@/pages/Calendario';
 import Presenca from '@/pages/Presenca';
@@ -63,6 +65,11 @@ function App() {
               <Route path="/aulas" element={
                 <ProtectedRoute>
                   <Aulas />
+                </ProtectedRoute>
+              } />
+              <Route path="/aulas-admin" element={
+                <ProtectedRoute>
+                  <AulasAdmin />
                 </ProtectedRoute>
               } />
               <Route path="/aula/:id" element={

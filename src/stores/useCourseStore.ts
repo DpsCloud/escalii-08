@@ -23,14 +23,14 @@ interface CourseStore {
   getFilteredCourses: () => Course[];
 }
 
-// Dados mock expandidos para cursos
+// Dados mock atualizados
 const mockCourses: Course[] = [
   {
     id: '1',
     nome: 'ESCALI Capacitação de Líderes 2025.1',
-    descricao: 'Curso de capacitação para desenvolvimento de líderes cristãos',
+    descricao: 'Curso de capacitação para desenvolvimento de líderes cristãos da turma 2025.1. Este curso aborda os fundamentos da liderança bíblica, desenvolvimento de caráter e habilidades práticas para o ministério.',
     tipo: 'capacitacao',
-    periodo: '2025.1',
+    turma: '2025.1',
     dataInicio: '2025-05-01',
     dataFim: '2025-07-30',
     totalAulas: 8,
@@ -55,15 +55,16 @@ const mockCourses: Course[] = [
         maxAulas: 8
       }
     ],
+    aulas: [],
     createdAt: '2025-01-15T10:00:00Z',
     updatedAt: '2025-01-20T15:30:00Z'
   },
   {
     id: '2',
     nome: 'ESCALI Capacitação de Líderes 2025.2',
-    descricao: 'Segunda turma de capacitação do ano de 2025',
+    descricao: 'Curso de capacitação para desenvolvimento de líderes cristãos da turma 2025.2. Este curso aborda os fundamentos da liderança bíblica, desenvolvimento de caráter e habilidades práticas para o ministério.',
     tipo: 'capacitacao',
-    periodo: '2025.2',
+    turma: '2025.2',
     dataInicio: '2025-08-01',
     dataFim: '2025-10-30',
     totalAulas: 8,
@@ -73,15 +74,16 @@ const mockCourses: Course[] = [
     maxAlunos: 40,
     alunosInscritos: 0,
     turmas: [],
+    aulas: [],
     createdAt: '2025-01-15T10:00:00Z',
     updatedAt: '2025-01-15T10:00:00Z'
   },
   {
     id: '3',
-    nome: 'Revalidação 2025.1',
-    descricao: 'Curso de revalidação para líderes já capacitados',
+    nome: 'ESCALI Revalidação 2025.1',
+    descricao: 'Curso de revalidação para líderes já capacitados da turma 2025.1. Atualização e aprofundamento dos conceitos de liderança cristã, com foco em novos desafios e metodologias.',
     tipo: 'revalidacao',
-    periodo: '2025.1',
+    turma: '2025.1',
     dataInicio: '2025-06-01',
     dataFim: '2025-06-30',
     totalAulas: 4,
@@ -106,41 +108,9 @@ const mockCourses: Course[] = [
         maxAulas: 4
       }
     ],
+    aulas: [],
     createdAt: '2025-01-10T14:00:00Z',
     updatedAt: '2025-01-18T09:15:00Z'
-  },
-  {
-    id: '4',
-    nome: 'ESCALI Capacitação de Líderes 2024.2',
-    descricao: 'Curso finalizado do segundo semestre de 2024',
-    tipo: 'capacitacao',
-    periodo: '2024.2',
-    dataInicio: '2024-08-01',
-    dataFim: '2024-10-30',
-    totalAulas: 8,
-    cargaHoraria: 32,
-    status: 'finalizado',
-    inscricoesAbertas: false,
-    maxAlunos: 40,
-    alunosInscritos: 38,
-    turmas: [
-      {
-        id: 't3',
-        nome: 'Turma B',
-        cursoId: '4',
-        status: 'finalizada',
-        alunos: 38,
-        maxAlunos: 40,
-        dataInicio: '2024-08-01',
-        dataFim: '2024-10-30',
-        professorId: 'p1',
-        professorNome: 'Pastor João',
-        aulas: 8,
-        maxAulas: 8
-      }
-    ],
-    createdAt: '2024-06-15T10:00:00Z',
-    updatedAt: '2024-10-30T18:00:00Z'
   }
 ];
 
@@ -155,7 +125,7 @@ export const useCourseStore = create<CourseStore>()(
       
       setCourses: (courses) => set({ courses }),
       addCourse: (course) => set((state) => ({ 
-        courses: [...state.courses, { ...course, id: Date.now().toString() }] 
+        courses: [...state.courses, course] 
       })),
       updateCourse: (id, updatedCourse) => set((state) => ({
         courses: state.courses.map(course => 
@@ -188,7 +158,7 @@ export const useCourseStore = create<CourseStore>()(
         return courses.filter(course => {
           const matchesSearch = course.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                course.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                               course.periodo.includes(searchTerm);
+                               course.turma.includes(searchTerm);
           
           const matchesFilter = filterType === 'all' || course.tipo === filterType;
           

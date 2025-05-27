@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -7,18 +7,25 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, BookOpen, Calendar, GraduationCap, TrendingUp, CheckCircle, UserCheck, Download, MessageSquare, Cake } from 'lucide-react';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { CourseForm } from '@/components/CourseForm';
+import { StudentForm } from '@/components/StudentForm';
+import { Users, BookOpen, Calendar, GraduationCap, TrendingUp, CheckCircle, UserCheck, Download, MessageSquare, Cake, Plus } from 'lucide-react';
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [courseDialogOpen, setCourseDialogOpen] = useState(false);
+  const [studentDialogOpen, setStudentDialogOpen] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const { isAdmin } = useAuth();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Mock data para o dashboard do administrador
+  // ... keep existing code (dashboardData and other constants)
+
   const dashboardData = {
     visaoGeral: {
       alunosCadastrados: 156,
@@ -111,16 +118,16 @@ const Dashboard = () => {
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">Dashboard Administrativo</h1>
                 <p className="text-sm sm:text-base text-gray-600">Visão geral do sistema ESCALI</p>
               </div>
-              <Button>
+              <Button onClick={() => navigate('/relatorios')} className="hover-scale">
                 <Calendar className="h-4 w-4 mr-2" />
                 Ver Relatórios Completos
               </Button>
             </div>
 
-            {/* Cards de métricas principais */}
+            {/* Cards de métricas principais com animações */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {cards.map((card, index) => (
-                <Card key={index} className="w-full">
+                <Card key={index} className="w-full hover-scale animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
                     {card.icon}
@@ -135,17 +142,19 @@ const Dashboard = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Status das Turmas */}
-              <Card className="lg:col-span-2">
+              <Card className="lg:col-span-2 animate-fade-in">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Status das Turmas</CardTitle>
-                    <Button variant="outline" size="sm">Gerenciar</Button>
+                    <Button variant="outline" size="sm" onClick={() => navigate('/cursos')} className="hover-scale">
+                      Gerenciar
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {turmasStatus.map((turma, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg transition-all duration-200 hover:bg-muted/70">
                         <div className="flex-1">
                           <h4 className="text-sm font-medium">{turma.nome}</h4>
                           <p className="text-xs text-muted-foreground">
@@ -162,7 +171,7 @@ const Dashboard = () => {
               </Card>
 
               {/* Aniversariantes */}
-              <Card>
+              <Card className="animate-fade-in">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Cake className="h-4 w-4" />
@@ -172,7 +181,7 @@ const Dashboard = () => {
                 <CardContent>
                   <div className="space-y-3">
                     {dashboardData.aniversariantes.map((aniversariante, index) => (
-                      <div key={index} className="flex items-center justify-between">
+                      <div key={index} className="flex items-center justify-between p-2 rounded transition-colors hover:bg-muted/50">
                         <span className="text-sm font-medium">{aniversariante.nome}</span>
                         <span className="text-xs text-muted-foreground">{aniversariante.data}</span>
                       </div>
@@ -182,22 +191,22 @@ const Dashboard = () => {
               </Card>
             </div>
 
-            {/* Engajamento e Atividades Recentes */}
+            {/* Engajamento e Ações Rápidas */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="animate-fade-in">
                 <CardHeader>
                   <CardTitle>Métricas de Engajamento</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50">
                       <div className="flex items-center gap-2">
                         <Download className="h-4 w-4 text-blue-600" />
                         <span className="text-sm">Downloads de Materiais</span>
                       </div>
                       <span className="font-bold text-blue-600">{dashboardData.engajamento.downloadsMateriais}</span>
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-green-50">
                       <div className="flex items-center gap-2">
                         <MessageSquare className="h-4 w-4 text-green-600" />
                         <span className="text-sm">Comentários por Aula</span>
@@ -208,25 +217,50 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="animate-fade-in">
                 <CardHeader>
                   <CardTitle>Ações Rápidas</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <Button className="w-full justify-start" variant="outline">
-                      <Users className="h-4 w-4 mr-2" />
-                      Cadastrar Novo Aluno
+                    <Dialog open={studentDialogOpen} onOpenChange={setStudentDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full justify-start hover-scale" variant="outline">
+                          <Users className="h-4 w-4 mr-2" />
+                          Cadastrar Novo Aluno
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <StudentForm onClose={() => setStudentDialogOpen(false)} />
+                      </DialogContent>
+                    </Dialog>
+
+                    <Dialog open={courseDialogOpen} onOpenChange={setCourseDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full justify-start hover-scale" variant="outline">
+                          <BookOpen className="h-4 w-4 mr-2" />
+                          Criar Novo Curso
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <CourseForm onClose={() => setCourseDialogOpen(false)} />
+                      </DialogContent>
+                    </Dialog>
+
+                    <Button 
+                      className="w-full justify-start hover-scale" 
+                      variant="outline"
+                      onClick={() => navigate('/aulas-admin')}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Gerenciar Aulas
                     </Button>
-                    <Button className="w-full justify-start" variant="outline">
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      Criar Nova Turma
-                    </Button>
-                    <Button className="w-full justify-start" variant="outline">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Agendar Aula
-                    </Button>
-                    <Button className="w-full justify-start" variant="outline">
+
+                    <Button 
+                      className="w-full justify-start hover-scale" 
+                      variant="outline"
+                      onClick={() => navigate('/relatorios')}
+                    >
                       <TrendingUp className="h-4 w-4 mr-2" />
                       Gerar Relatório
                     </Button>
