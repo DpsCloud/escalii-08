@@ -9,18 +9,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { toast } from '@/components/ui/use-toast';
-import { Course, Aula, Material } from '@/types/course';
-import { Plus, Trash2, FileText } from 'lucide-react';
+import { Aula, Material } from '@/types/course';
+import { useAulaStore } from '@/stores/useAulaStore';
+import { Plus, Trash2, FileText, Tag } from 'lucide-react';
 
 const aulaSchema = z.object({
   titulo: z.string().min(1, "Título é obrigatório"),
   descricao: z.string().min(1, "Descrição é obrigatória"),
-  cursoId: z.string().min(1, "Curso é obrigatório"),
-  ordem: z.number().min(1, "Ordem deve ser maior que 0"),
   duracao: z.number().min(1, "Duração deve ser maior que 0"),
-  dataAula: z.string().optional(),
   videoUrl: z.string().optional(),
   status: z.enum(['planejada', 'ativa', 'concluida']),
+  categoria: z.string().optional(),
+  tags: z.string().optional(),
 });
 
 type AulaFormData = z.infer<typeof aulaSchema>;
@@ -28,34 +28,31 @@ type AulaFormData = z.infer<typeof aulaSchema>;
 interface AulaFormProps {
   onClose: () => void;
   editingAula?: Aula;
-  courses: Course[];
-  preSelectedCourse?: string;
 }
 
-export const AulaForm = ({ onClose, editingAula, courses, preSelectedCourse }: AulaFormProps) => {
+export const AulaForm = ({ onClose, editingAula }: AulaFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [materiais, setMateriais] = useState<Material[]>(editingAula?.materiais || []);
+  const { addAula, updateAula } = useAulaStore();
 
   const form = useForm<AulaFormData>({
     resolver: zodResolver(aulaSchema),
     defaultValues: editingAula ? {
       titulo: editingAula.titulo,
       descricao: editingAula.descricao,
-      cursoId: editingAula.cursoId,
-      ordem: editingAula.ordem,
       duracao: editingAula.duracao,
-      dataAula: editingAula.dataAula || '',
       videoUrl: editingAula.videoUrl || '',
-      status: editingAula.status
+      status: editingAula.status,
+      categoria: editingAula.categoria || '',
+      tags: editingAula.tags?.join(', ') || ''
     } : {
       titulo: '',
       descricao: '',
-      cursoId: preSelectedCourse || '',
-      ordem: 1,
       duracao: 120,
-      dataAula: '',
       videoUrl: '',
-      status: 'planejada'
+      status: 'planejada',
+      categoria: '',
+      tags: ''
     }
   });
 
@@ -84,23 +81,28 @@ export const AulaForm = ({ onClose, editingAula, courses, preSelectedCourse }: A
     setIsSubmitting(true);
     
     try {
+      const aulaId = editingAula?.id || Date.now().toString();
+      const tags = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
+      
       const aulaData: Aula = {
-        id: editingAula?.id || Date.now().toString(),
+        id: aulaId,
         titulo: data.titulo,
         descricao: data.descricao,
-        cursoId: data.cursoId,
-        ordem: data.ordem,
         duracao: data.duracao,
-        dataAula: data.dataAula || undefined,
         videoUrl: data.videoUrl || undefined,
-        materiais: materiais.map(m => ({ ...m, aulaId: editingAula?.id || Date.now().toString() })),
+        materiais: materiais.map(m => ({ ...m, aulaId })),
         status: data.status,
+        categoria: data.categoria || undefined,
+        tags,
         createdAt: editingAula?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
 
-      // Aqui você implementaria a lógica de salvar no store
-      console.log('Salvando aula:', aulaData);
+      if (editingAula) {
+        updateAula(editingAula.id, aulaData);
+      } else {
+        addAula(aulaData);
+      }
       
       toast({
         title: editingAula ? "Aula atualizada" : "Aula criada",
@@ -126,7 +128,7 @@ export const AulaForm = ({ onClose, editingAula, courses, preSelectedCourse }: A
           {editingAula ? 'Editar Aula' : 'Nova Aula'}
         </h2>
         <p className="text-sm text-gray-600">
-          Preencha os dados da aula abaixo
+          Crie uma aula independente que pode ser reutilizada em diferentes cursos
         </p>
       </div>
 
@@ -134,63 +136,17 @@ export const AulaForm = ({ onClose, editingAula, courses, preSelectedCourse }: A
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
-            name="cursoId"
+            name="titulo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Curso</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o curso" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {courses.map((course) => (
-                      <SelectItem key={course.id} value={course.id}>
-                        {course.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormLabel>Título da Aula</FormLabel>
+                <FormControl>
+                  <Input placeholder="Digite o título da aula" {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="titulo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Título da Aula</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Digite o título da aula" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="ordem"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Ordem da Aula</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="1" 
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
 
           <FormField
             control={form.control}
@@ -232,12 +188,12 @@ export const AulaForm = ({ onClose, editingAula, courses, preSelectedCourse }: A
 
             <FormField
               control={form.control}
-              name="dataAula"
+              name="categoria"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Data da Aula (opcional)</FormLabel>
+                  <FormLabel>Categoria (opcional)</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input placeholder="Ex: Fundamentos, Caráter..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -267,6 +223,23 @@ export const AulaForm = ({ onClose, editingAula, courses, preSelectedCourse }: A
               )}
             />
           </div>
+
+          <FormField
+            control={form.control}
+            name="tags"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Tag className="h-4 w-4" />
+                  Tags (separadas por vírgula)
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="liderança, fundamentos, caráter..." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}

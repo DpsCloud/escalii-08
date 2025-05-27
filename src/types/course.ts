@@ -21,8 +21,8 @@ export interface Course {
   id: string;
   nome: string;
   descricao: string;
-  tipo: TipoCurso; // Sempre 'capacitacao' ou 'revalidacao'
-  turma: TurmaDisponivel; // Sempre no formato YYYY.N
+  tipo: TipoCurso;
+  turma: TurmaDisponivel;
   dataInicio: string;
   dataFim: string;
   totalAulas: number;
@@ -32,7 +32,6 @@ export interface Course {
   maxAlunos: number;
   alunosInscritos: number;
   turmas: Turma[];
-  aulas: Aula[];
   createdAt: string;
   updatedAt: string;
 }
@@ -52,19 +51,30 @@ export interface Turma {
   maxAulas: number;
 }
 
+// Aula agora é independente de curso
 export interface Aula {
   id: string;
   titulo: string;
   descricao: string;
-  cursoId: string;
-  ordem: number;
   duracao: number; // em minutos
-  dataAula?: string;
   videoUrl?: string;
   materiais: Material[];
   status: 'planejada' | 'ativa' | 'concluida';
+  categoria?: string; // Para organizar as aulas por categoria
+  tags: string[]; // Para facilitar busca e reutilização
   createdAt: string;
   updatedAt: string;
+}
+
+// Relacionamento entre curso e aula
+export interface CursoAula {
+  id: string;
+  cursoId: string;
+  aulaId: string;
+  ordem: number; // A ordem é específica do curso
+  dataAula?: string; // Data específica para este curso
+  obrigatoria: boolean;
+  createdAt: string;
 }
 
 export interface Material {
@@ -91,7 +101,6 @@ export const gerarDescricaoCurso = (tipo: TipoCurso, turma: TurmaDisponivel): st
   }
 };
 
-// Funções de validação para garantir consistência
 export const validarTipoCurso = (tipo: string): tipo is TipoCurso => {
   return ['capacitacao', 'revalidacao'].includes(tipo);
 };
@@ -100,12 +109,10 @@ export const validarTurma = (turma: string): turma is TurmaDisponivel => {
   return TURMAS_DISPONIVEIS.includes(turma as TurmaDisponivel);
 };
 
-// Função para obter texto legível dos tipos
 export const getTipoTexto = (tipo: TipoCurso): string => {
   return tipo === 'capacitacao' ? 'Capacitação' : 'Revalidação';
 };
 
-// Função para obter cor do status
 export const getStatusColor = (status: StatusCurso): string => {
   switch (status) {
     case 'ativo': return 'bg-green-100 text-green-800';
@@ -116,7 +123,6 @@ export const getStatusColor = (status: StatusCurso): string => {
   }
 };
 
-// Função para obter texto legível do status
 export const getStatusTexto = (status: StatusCurso): string => {
   switch (status) {
     case 'ativo': return 'Em Andamento';
