@@ -32,7 +32,14 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
       email: editingStudent.email,
       telefone: editingStudent.telefone,
       dataNascimento: editingStudent.dataNascimento,
-      endereco: editingStudent.endereco,
+      endereco: editingStudent.endereco || {
+        rua: '',
+        numero: '',
+        bairro: '',
+        cidade: '',
+        cep: '',
+        estado: ''
+      },
       status: editingStudent.status,
       observacoes: editingStudent.observacoes || ''
     } : {

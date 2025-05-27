@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
-import { StatusCards } from '@/components/StatusCards';
-import { CourseProgress } from '@/components/CourseProgress';
-import { UpcomingClasses } from '@/components/UpcomingClasses';
-import { RecentMaterials } from '@/components/RecentMaterials';
+import StatusCards from '@/components/StatusCards';
+import CourseProgress from '@/components/CourseProgress';
+import UpcomingClasses from '@/components/UpcomingClasses';
+import RecentMaterials from '@/components/RecentMaterials';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useStudentStore } from '@/stores/useStudentStore';
 import { useCourseStore } from '@/stores/useCourseStore';
