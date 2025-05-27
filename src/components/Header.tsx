@@ -70,7 +70,7 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
                     isAdmin ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                   }`}>
-                    {isAdmin ? 'Admin' : 'Instrutor'}
+                    {isAdmin ? 'Admin' : 'Aluno'}
                   </span>
                 </div>
               </div>

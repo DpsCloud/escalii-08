@@ -1,17 +1,17 @@
 
 const RecentMaterials = () => {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">Materiais Recentes</h3>
-        <a href="#" className="text-primary hover:text-primary-deep text-sm font-medium">
+    <div className="bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6">
+      <div className="flex justify-between items-center mb-3 sm:mb-4">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800">Materiais Recentes</h3>
+        <a href="#" className="text-primary hover:text-primary-deep text-xs sm:text-sm font-medium">
           Ver todos
         </a>
       </div>
-      <div className="space-y-2 sm:space-y-3">
+      <div className="space-y-1 sm:space-y-2 md:space-y-3">
         <div className="material-item">
-          <div className="p-2 bg-red-100 rounded-lg mr-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="p-1.5 sm:p-2 bg-red-100 rounded-lg mr-2 sm:mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
             </svg>
           </div>
@@ -27,8 +27,8 @@ const RecentMaterials = () => {
         </div>
 
         <div className="material-item">
-          <div className="p-2 bg-blue-100 rounded-lg mr-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg mr-2 sm:mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
             </svg>
           </div>
@@ -44,8 +44,8 @@ const RecentMaterials = () => {
         </div>
 
         <div className="material-item">
-          <div className="p-2 bg-green-100 rounded-lg mr-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg mr-2 sm:mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
             </svg>
           </div>
