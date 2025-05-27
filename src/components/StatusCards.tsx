@@ -22,7 +22,7 @@ const StatusCards = () => {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
       <div className="card bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6">
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h3 className="text-xs sm:text-sm font-semibold text-gray-500">PROGRESSO DO CURSO</h3>
@@ -30,7 +30,7 @@ const StatusCards = () => {
         </div>
         <div className="flex items-center">
           <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mr-2 sm:mr-3 md:mr-4 flex-shrink-0">
-            <svg className="progress-ring" width="48" height="48" viewBox="0 0 60 60" className="sm:w-14 sm:h-14 md:w-16 md:h-16">
+            <svg className="progress-ring w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16" width="48" height="48" viewBox="0 0 60 60">
               <circle className="progress-ring__circle" stroke="#e5e7eb" strokeWidth="6" fill="transparent" r="25" cx="30" cy="30"></circle>
               <circle className="progress-ring__circle" stroke="#3b82f6" strokeWidth="6" fill="transparent" r="25" cx="30" cy="30"></circle>
             </svg>
