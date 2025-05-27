@@ -29,12 +29,12 @@ export const AulaFilters = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">Curso</label>
-            <Select value={selectedCourse} onValueChange={onCourseChange}>
+            <Select value={selectedCourse || "all"} onValueChange={onCourseChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Todos os cursos" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos os cursos</SelectItem>
+                <SelectItem value="all">Todos os cursos</SelectItem>
                 {courses.map((course) => (
                   <SelectItem key={course.id} value={course.id}>
                     {course.nome}

@@ -16,7 +16,7 @@ const AulasAdmin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aulaDialogOpen, setAulaDialogOpen] = useState(false);
   const [editingAula, setEditingAula] = useState<Aula | undefined>();
-  const [selectedCourse, setSelectedCourse] = useState<string>('');
+  const [selectedCourse, setSelectedCourse] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const isMobile = useIsMobile();
   const { courses } = useCourseStore();
@@ -26,7 +26,7 @@ const AulasAdmin = () => {
   };
 
   const filteredCourses = courses.filter(course => 
-    selectedCourse === '' || course.id === selectedCourse
+    selectedCourse === 'all' || course.id === selectedCourse
   );
 
   const handleEditAula = (aula: Aula) => {
@@ -37,6 +37,10 @@ const AulasAdmin = () => {
   const handleCloseDialog = () => {
     setAulaDialogOpen(false);
     setEditingAula(undefined);
+  };
+
+  const handleCourseChange = (value: string) => {
+    setSelectedCourse(value === 'all' ? 'all' : value);
   };
 
   return (
@@ -76,7 +80,7 @@ const AulasAdmin = () => {
               selectedCourse={selectedCourse}
               searchTerm={searchTerm}
               courses={courses}
-              onCourseChange={setSelectedCourse}
+              onCourseChange={handleCourseChange}
               onSearchChange={setSearchTerm}
             />
 
