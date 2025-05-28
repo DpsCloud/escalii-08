@@ -6,7 +6,6 @@ import StatusCards from '@/components/StatusCards';
 import UpcomingClasses from '@/components/UpcomingClasses';
 import RecentMaterials from '@/components/RecentMaterials';
 import AttendanceForm from '@/components/AttendanceForm';
-import Notifications from '@/components/Notifications';
 import CourseProgress from '@/components/CourseProgress';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
@@ -42,7 +41,7 @@ const Index = () => {
               Olá, {profile?.nome || 'Usuário'}!
             </h1>
             <p className="text-xs sm:text-sm md:text-base text-gray-600">
-              Bem-vindo ao seu dashboard do curso ESCALI Capacitação de Líderes - Turma 2025.1
+              Bem-vindo ao seu dashboard do curso ESCALI Capacitação de Líderes
             </p>
           </div>
 
