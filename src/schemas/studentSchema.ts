@@ -31,12 +31,12 @@ export const studentSchema = z.object({
     .min(1, 'Data de nascimento é obrigatória'),
   
   endereco: z.object({
-    rua: z.string().min(1, 'Rua é obrigatória'),
-    numero: z.string().min(1, 'Número é obrigatório'),
-    bairro: z.string().min(1, 'Bairro é obrigatório'),
-    cidade: z.string().min(1, 'Cidade é obrigatória'),
-    cep: z.string().regex(cepRegex, 'CEP deve estar no formato 00000-000'),
-    estado: z.string().min(2, 'Estado é obrigatório').max(2, 'Use a sigla do estado')
+    rua: z.string().optional(),
+    numero: z.string().optional(),
+    bairro: z.string().optional(),
+    cidade: z.string().optional(),
+    cep: z.string().optional(),
+    estado: z.string().optional()
   }).optional(),
   
   status: z.enum(['ativo', 'pendente', 'formado', 'inativo'], {
