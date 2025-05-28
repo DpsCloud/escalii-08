@@ -7,10 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { Student } from '@/types/student';
 import { useStudentStore } from '@/stores/useStudentStore';
-import { useCourseStore } from '@/stores/useCourseStore';
 import { studentSchema, StudentFormData } from '@/schemas/studentSchema';
 
 interface StudentFormProps {
@@ -21,8 +20,6 @@ interface StudentFormProps {
 export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addStudent, updateStudent } = useStudentStore();
-  const { getAllCourses } = useCourseStore();
-  const courses = getAllCourses();
 
   const form = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema),
@@ -74,7 +71,7 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
         email: data.email,
         telefone: data.telefone,
         dataNascimento: data.dataNascimento,
-        endereco: data.endereco && Object.keys(data.endereco).length > 0 ? {
+        endereco: data.endereco && (data.endereco.rua || data.endereco.numero || data.endereco.bairro || data.endereco.cidade || data.endereco.cep || data.endereco.estado) ? {
           rua: data.endereco.rua || '',
           numero: data.endereco.numero || '',
           bairro: data.endereco.bairro || '',
@@ -86,7 +83,7 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
         turma: editingStudent?.turma,
         progresso: editingStudent?.progresso || 0,
         status: data.status,
-        foto: editingStudent?.foto,
+        foto: editingStudent?.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nome)}&background=3b82f6&color=fff`,
         dataMatricula: editingStudent?.dataMatricula || new Date().toISOString().split('T')[0],
         presencaGeral: editingStudent?.presencaGeral || 0,
         aulasAssistidas: editingStudent?.aulasAssistidas || 0,
@@ -111,6 +108,7 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
       
       onClose();
     } catch (error) {
+      console.error('Erro ao salvar aluno:', error);
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao salvar o aluno. Tente novamente.",
@@ -215,7 +213,7 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
 
           {/* Endereço */}
           <div className="space-y-4">
-            <h3 className="text-md font-medium border-b pb-2">Endereço</h3>
+            <h3 className="text-md font-medium border-b pb-2">Endereço (Opcional)</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
@@ -323,11 +321,8 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">Nenhum curso</SelectItem>
-                    {courses.map((course) => (
-                      <SelectItem key={course.id} value={course.nome}>
-                        {course.nome}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="ESCALI 2025.1">ESCALI 2025.1</SelectItem>
+                    <SelectItem value="ESCALI 2024.2">ESCALI 2024.2</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
