@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 interface LoginFormProps {
@@ -11,29 +11,16 @@ interface LoginFormProps {
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onRegister }) => {
-  const [cpf, setCpf] = useState('');
+  const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { signIn } = useAuth();
   const { toast } = useToast();
-
-  const formatCPF = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 11) {
-      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    }
-    return value;
-  };
-
-  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCPF(e.target.value);
-    setCpf(formatted);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!cpf || !senha) {
+    if (!email || !senha) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos",
@@ -45,24 +32,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onRegist
     setLoading(true);
     
     try {
-      const response = await login(cpf, senha);
-      
-      if (response.status === 'success') {
-        toast({
-          title: "Sucesso",
-          description: "Login realizado com sucesso!"
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: response.message || "Credenciais inválidas",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
+      await signIn(email, senha);
+      toast({
+        title: "Sucesso",
+        description: "Login realizado com sucesso!"
+      });
+    } catch (error: any) {
       toast({
         title: "Erro",
-        description: "Erro ao fazer login",
+        description: error.message || "Credenciais inválidas",
         variant: "destructive"
       });
     } finally {
@@ -80,16 +58,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onRegist
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="cpf" className="block text-sm font-medium text-gray-700 mb-2">
-              CPF
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Email
             </label>
             <Input
-              id="cpf"
-              type="text"
-              value={cpf}
-              onChange={handleCPFChange}
-              placeholder="000.000.000-00"
-              maxLength={14}
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Digite seu email"
               required
             />
           </div>
@@ -137,12 +114,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onRegist
               Cadastrar-se
             </Button>
           </div>
-        </div>
-
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <p className="text-xs text-gray-500 text-center">
-            Demo: Use CPF 111.111.111-11 (Admin) ou 222.222.222-22 (Aluno)
-          </p>
         </div>
       </div>
     </div>
