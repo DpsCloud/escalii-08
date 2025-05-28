@@ -10,7 +10,7 @@ export const courseSchema = z.object({
   dataFim: z.string().min(1, 'Data de fim é obrigatória'),
   totalAulas: z.number().min(1, 'Total de aulas deve ser maior que 0'),
   maxAlunos: z.number().min(1, 'Máximo de alunos deve ser maior que 0'),
-  status: z.enum(['planejado', 'ativo', 'finalizado', 'cancelado']),
+  status: z.enum(['ativo', 'planejado', 'finalizado', 'cancelado']),
   diasSemana: z.array(z.enum(['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'])),
   aulasSelecionadas: z.array(z.string())
 });

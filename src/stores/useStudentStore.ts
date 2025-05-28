@@ -26,6 +26,7 @@ interface StudentStore {
 const mockStudents: Student[] = [
   {
     id: '1',
+    profileId: '1',
     nome: 'João Silva',
     cpf: '111.111.111-11',
     telefone: '(11) 99999-9999',
@@ -39,8 +40,7 @@ const mockStudents: Student[] = [
       cep: '01234-567',
       estado: 'SP'
     },
-    curso: 'ESCALI 2025.1',
-    turma: 'Turma A',
+    turmaId: '1',
     progresso: 75,
     status: 'ativo',
     foto: 'https://ui-avatars.com/api/?name=João+Silva&background=3b82f6&color=fff',
@@ -49,10 +49,16 @@ const mockStudents: Student[] = [
     aulasAssistidas: 5,
     aproveitamento: 92,
     certificadoDisponivel: false,
-    observacoes: 'Aluno dedicado e participativo'
+    observacoes: 'Aluno dedicado e participativo',
+    inscricaoAutomatica: true,
+    createdAt: '2025-01-15T10:00:00Z',
+    updatedAt: '2025-01-15T10:00:00Z',
+    curso: 'ESCALI 2025.1',
+    turma: 'Turma A'
   },
   {
     id: '2',
+    profileId: '2',
     nome: 'Maria Santos',
     cpf: '222.222.222-22',
     telefone: '(11) 88888-8888',
@@ -66,8 +72,7 @@ const mockStudents: Student[] = [
       cep: '01234-890',
       estado: 'SP'
     },
-    curso: 'ESCALI 2025.1',
-    turma: 'Turma A',
+    turmaId: '1',
     progresso: 62,
     status: 'ativo',
     foto: 'https://ui-avatars.com/api/?name=Maria+Santos&background=ec4899&color=fff',
@@ -75,45 +80,12 @@ const mockStudents: Student[] = [
     presencaGeral: 95,
     aulasAssistidas: 4,
     aproveitamento: 88,
-    certificadoDisponivel: false
-  },
-  {
-    id: '3',
-    nome: 'Pedro Costa',
-    cpf: '333.333.333-33',
-    telefone: '(11) 77777-7777',
-    email: 'pedro@email.com',
-    dataNascimento: '1992-08-10',
-    curso: undefined,
-    turma: undefined,
-    progresso: 0,
-    status: 'pendente',
-    foto: 'https://ui-avatars.com/api/?name=Pedro+Costa&background=10b981&color=fff',
-    dataMatricula: '2025-01-20',
-    presencaGeral: 0,
-    aulasAssistidas: 0,
-    aproveitamento: 0,
     certificadoDisponivel: false,
-    observacoes: 'Aguardando definição de turma'
-  },
-  {
-    id: '4',
-    nome: 'Ana Oliveira',
-    cpf: '444.444.444-44',
-    telefone: '(11) 66666-6666',
-    email: 'ana@email.com',
-    dataNascimento: '1985-12-03',
-    curso: 'ESCALI 2024.2',
-    turma: 'Turma B',
-    progresso: 100,
-    status: 'formado',
-    foto: 'https://ui-avatars.com/api/?name=Ana+Oliveira&background=f59e0b&color=fff',
-    dataMatricula: '2024-08-01',
-    presencaGeral: 100,
-    aulasAssistidas: 8,
-    aproveitamento: 95,
-    certificadoDisponivel: true,
-    observacoes: 'Concluiu o curso com excelência'
+    inscricaoAutomatica: true,
+    createdAt: '2025-01-15T10:00:00Z',
+    updatedAt: '2025-01-15T10:00:00Z',
+    curso: 'ESCALI 2025.1',
+    turma: 'Turma A'
   }
 ];
 

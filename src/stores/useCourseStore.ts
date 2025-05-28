@@ -29,11 +29,10 @@ const mockCourses: Course[] = [
   {
     id: '1',
     nome: 'ESCALI Capacitação de Líderes 2025.1',
-    descricao: 'Curso de capacitação para desenvolvimento de líderes cristãos da turma 2025.1. Este curso aborda os fundamentos da liderança bíblica, desenvolvimento de caráter e habilidades práticas para o ministério.',
+    descricao: 'Curso de capacitação para desenvolvimento de líderes cristãos da turma 2025.1.',
     tipo: 'capacitacao',
     ano: '2025',
     periodo: '1',
-    turma: '2025.1',
     dataInicio: '2025-05-01',
     dataFim: '2025-07-30',
     totalAulas: 8,
@@ -43,34 +42,17 @@ const mockCourses: Course[] = [
     maxAlunos: 40,
     alunosInscritos: 35,
     diasSemana: ['segunda', 'quarta', 'sexta'],
-    aulasSelecionadas: ['1', '2', '3', '4', '5', '6', '7', '8'],
-    turmas: [
-      {
-        id: 't1',
-        nome: 'Turma A',
-        cursoId: '1',
-        status: 'ativa',
-        alunos: 35,
-        maxAlunos: 40,
-        dataInicio: '2025-05-01',
-        dataFim: '2025-07-30',
-        professorId: 'p1',
-        professorNome: 'Pastor João',
-        aulas: 5,
-        maxAulas: 8
-      }
-    ],
+    turmas: [],
     createdAt: '2025-01-15T10:00:00Z',
     updatedAt: '2025-01-20T15:30:00Z'
   },
   {
     id: '2',
     nome: 'ESCALI Capacitação de Líderes 2025.2',
-    descricao: 'Curso de capacitação para desenvolvimento de líderes cristãos da turma 2025.2. Este curso aborda os fundamentos da liderança bíblica, desenvolvimento de caráter e habilidades práticas para o ministério.',
+    descricao: 'Curso de capacitação para desenvolvimento de líderes cristãos da turma 2025.2.',
     tipo: 'capacitacao',
     ano: '2025',
     periodo: '2',
-    turma: '2025.2',
     dataInicio: '2025-08-01',
     dataFim: '2025-10-30',
     totalAulas: 8,
@@ -80,47 +62,9 @@ const mockCourses: Course[] = [
     maxAlunos: 40,
     alunosInscritos: 0,
     diasSemana: ['terca', 'quinta'],
-    aulasSelecionadas: [],
     turmas: [],
     createdAt: '2025-01-15T10:00:00Z',
     updatedAt: '2025-01-15T10:00:00Z'
-  },
-  {
-    id: '3',
-    nome: 'ESCALI Revalidação 2025.revalida',
-    descricao: 'Curso de revalidação para líderes já capacitados da turma 2025.revalida. Atualização e aprofundamento dos conceitos de liderança cristã, com foco em novos desafios e metodologias.',
-    tipo: 'revalidacao',
-    ano: '2025',
-    periodo: 'revalida',
-    turma: '2025.revalida',
-    dataInicio: '2025-06-01',
-    dataFim: '2025-06-30',
-    totalAulas: 4,
-    cargaHoraria: 16,
-    status: 'ativo',
-    inscricoesAbertas: true,
-    maxAlunos: 20,
-    alunosInscritos: 12,
-    diasSemana: ['sabado'],
-    aulasSelecionadas: ['1', '2', '3', '4'],
-    turmas: [
-      {
-        id: 't2',
-        nome: 'Revalidação A',
-        cursoId: '3',
-        status: 'ativa',
-        alunos: 12,
-        maxAlunos: 20,
-        dataInicio: '2025-06-01',
-        dataFim: '2025-06-30',
-        professorId: 'p2',
-        professorNome: 'Pastora Maria',
-        aulas: 2,
-        maxAulas: 4
-      }
-    ],
-    createdAt: '2025-01-10T14:00:00Z',
-    updatedAt: '2025-01-18T09:15:00Z'
   }
 ];
 
@@ -167,8 +111,8 @@ export const useCourseStore = create<CourseStore>()(
         const { courses, searchTerm, filterType } = get();
         return courses.filter(course => {
           const matchesSearch = course.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                               course.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                               course.turma.includes(searchTerm);
+                               course.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                               `${course.ano}.${course.periodo}`.includes(searchTerm);
           
           const matchesFilter = filterType === 'all' || course.tipo === filterType;
           

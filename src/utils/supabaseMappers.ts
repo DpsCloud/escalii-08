@@ -1,5 +1,6 @@
 
-import { Aula, Material, Course, Student } from '@/types/course';
+import { Aula, Material, Course } from '@/types/course';
+import { Student } from '@/types/student';
 import type { Database } from '@/integrations/supabase/types';
 
 type SupabaseAula = Database['public']['Tables']['aulas']['Row'];
@@ -18,7 +19,7 @@ export function mapSupabaseAulaToAula(supabaseAula: SupabaseAula): Aula {
     titulo: supabaseAula.titulo,
     descricao: supabaseAula.descricao || undefined,
     duracao: supabaseAula.duracao,
-    status: supabaseAula.status,
+    status: supabaseAula.status as 'ativa' | 'planejada' | 'concluida',
     categoria: supabaseAula.categoria,
     tags: supabaseAula.tags || [],
     videoUrl: supabaseAula.video_url || undefined,
@@ -59,12 +60,14 @@ export function mapSupabaseCourseToC(supabaseCourse: SupabaseCourse): Course {
     totalAulas: supabaseCourse.total_aulas,
     cargaHoraria: supabaseCourse.carga_horaria,
     maxAlunos: supabaseCourse.max_alunos,
-    status: supabaseCourse.status,
+    status: supabaseCourse.status as 'ativo' | 'planejado' | 'finalizado' | 'cancelado',
     inscricoesAbertas: supabaseCourse.inscricoes_abertas || false,
     diasSemana: supabaseCourse.dias_semana || [],
     instructorId: supabaseCourse.instructor_id || undefined,
     createdAt: supabaseCourse.created_at || '',
-    updatedAt: supabaseCourse.updated_at || ''
+    updatedAt: supabaseCourse.updated_at || '',
+    alunosInscritos: 0,
+    turmas: []
   };
 }
 
@@ -96,6 +99,9 @@ export function mapSupabaseStudentToStudent(supabaseStudent: SupabaseStudent): S
     observacoes: supabaseStudent.observacoes || undefined,
     inscricaoAutomatica: supabaseStudent.inscricao_automatica || true,
     createdAt: supabaseStudent.created_at || '',
-    updatedAt: supabaseStudent.updated_at || ''
+    updatedAt: supabaseStudent.updated_at || '',
+    foto: `https://ui-avatars.com/api/?name=${encodeURIComponent(supabaseStudent.profiles?.nome || '')}&background=3b82f6&color=fff`,
+    curso: supabaseStudent.turmas?.courses?.nome,
+    turma: supabaseStudent.turmas?.nome
   };
 }

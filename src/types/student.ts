@@ -27,4 +27,8 @@ export interface Student {
   inscricaoAutomatica: boolean;
   createdAt: string;
   updatedAt: string;
+  // Campos computados para compatibilidade com UI
+  foto?: string;
+  curso?: string;
+  turma?: string;
 }

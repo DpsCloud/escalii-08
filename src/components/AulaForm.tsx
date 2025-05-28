@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,7 +17,7 @@ const aulaSchema = z.object({
   descricao: z.string().min(1, "Descrição é obrigatória"),
   duracao: z.number().min(1, "Duração deve ser maior que 0"),
   videoUrl: z.string().optional(),
-  status: z.enum(['planejada', 'ativa', 'concluida']),
+  status: z.enum(['ativa', 'planejada', 'concluida']),
   categoria: z.string().optional(),
   tags: z.string().optional(),
 });
@@ -92,7 +91,7 @@ export const AulaForm = ({ onClose, editingAula }: AulaFormProps) => {
         videoUrl: data.videoUrl || undefined,
         materiais: materiais.map(m => ({ ...m, aulaId })),
         status: data.status,
-        categoria: data.categoria || undefined,
+        categoria: data.categoria || '',
         tags,
         createdAt: editingAula?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
