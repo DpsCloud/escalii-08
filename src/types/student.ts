@@ -7,12 +7,12 @@ export interface Student {
   email: string;
   dataNascimento: string;
   endereco?: {
-    rua: string;
-    numero: string;
-    bairro: string;
-    cidade: string;
-    cep: string;
-    estado: string;
+    rua?: string;
+    numero?: string;
+    bairro?: string;
+    cidade?: string;
+    cep?: string;
+    estado?: string;
   };
   curso?: string;
   turma?: string;
