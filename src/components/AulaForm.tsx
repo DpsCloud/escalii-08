@@ -49,7 +49,7 @@ export const AulaForm = ({ onClose, editingAula }: AulaFormProps) => {
       descricao: '',
       duracao: 120,
       videoUrl: '',
-      status: 'planejada',
+      status: 'planejada' as const,
       categoria: '',
       tags: ''
     }
