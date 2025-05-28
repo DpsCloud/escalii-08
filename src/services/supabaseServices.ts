@@ -291,6 +291,9 @@ export const aulasService = {
 // ===================================
 
 export const authService = {
+  // Expor o cliente supabase para uso interno
+  supabase,
+
   // Login
   async signIn(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({

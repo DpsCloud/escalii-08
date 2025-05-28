@@ -25,49 +25,77 @@ export const useSupabaseAuth = (): UseSupabaseAuthReturn => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Buscar usuário inicial
-    const getInitialUser = async () => {
-      try {
-        const currentUser = await authService.getCurrentUser();
-        setUser(currentUser);
-        
-        if (currentUser) {
-          const userProfile = await profilesService.getCurrentProfile();
-          setProfile(userProfile);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar usuário inicial:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    let isMounted = true;
 
-    getInitialUser();
-
-    // Escutar mudanças de autenticação
+    // Configurar listener de mudanças de autenticação PRIMEIRO
     const { data: { subscription } } = authService.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth event:', event, session);
+        console.log('Auth event:', event, session?.user?.id);
         
+        if (!isMounted) return;
+
         if (session?.user) {
           setUser(session.user);
-          try {
-            const userProfile = await profilesService.getCurrentProfile();
-            setProfile(userProfile);
-          } catch (error) {
-            console.error('Erro ao buscar perfil:', error);
-            setProfile(null);
+          
+          // Buscar perfil apenas se necessário
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            try {
+              const userProfile = await profilesService.getCurrentProfile();
+              if (isMounted) {
+                setProfile(userProfile);
+              }
+            } catch (error) {
+              console.error('Erro ao buscar perfil:', error);
+              if (isMounted) {
+                setProfile(null);
+              }
+            }
           }
         } else {
           setUser(null);
           setProfile(null);
         }
         
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     );
 
+    // Buscar sessão inicial
+    const getInitialSession = async () => {
+      try {
+        const { data: { session } } = await authService.supabase.auth.getSession();
+        
+        if (!isMounted) return;
+
+        if (session?.user) {
+          setUser(session.user);
+          try {
+            const userProfile = await profilesService.getCurrentProfile();
+            if (isMounted) {
+              setProfile(userProfile);
+            }
+          } catch (error) {
+            console.error('Erro ao buscar perfil inicial:', error);
+            if (isMounted) {
+              setProfile(null);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao buscar sessão inicial:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    getInitialSession();
+
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
