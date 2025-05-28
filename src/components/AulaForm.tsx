@@ -17,7 +17,7 @@ const aulaSchema = z.object({
   descricao: z.string().min(1, "Descrição é obrigatória"),
   duracao: z.number().min(1, "Duração deve ser maior que 0"),
   videoUrl: z.string().optional(),
-  status: z.enum(['ativa', 'planejada', 'concluida']),
+  status: z.enum(['ativa', 'planejada', 'concluida', 'agendada', 'em_andamento', 'finalizada', 'cancelada']),
   categoria: z.string().optional(),
   tags: z.string().optional(),
 });
@@ -215,6 +215,10 @@ export const AulaForm = ({ onClose, editingAula }: AulaFormProps) => {
                       <SelectItem value="planejada">Planejada</SelectItem>
                       <SelectItem value="ativa">Ativa</SelectItem>
                       <SelectItem value="concluida">Concluída</SelectItem>
+                      <SelectItem value="agendada">Agendada</SelectItem>
+                      <SelectItem value="em_andamento">Em Andamento</SelectItem>
+                      <SelectItem value="finalizada">Finalizada</SelectItem>
+                      <SelectItem value="cancelada">Cancelada</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
