@@ -27,31 +27,56 @@ export const useSupabaseAuth = (): UseSupabaseAuthReturn => {
   useEffect(() => {
     let isMounted = true;
 
-    // Configurar listener de mudanças de autenticação PRIMEIRO
+    console.log('🔧 Inicializando useSupabaseAuth...');
+
+    // Configurar listener de mudanças de autenticação
     const { data: { subscription } } = authService.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth event:', event, session?.user?.id);
+        console.log('🔔 Auth event:', event, 'User ID:', session?.user?.id);
         
-        if (!isMounted) return;
+        if (!isMounted) {
+          console.log('⚠️ Componente desmontado, ignorando evento');
+          return;
+        }
 
         if (session?.user) {
+          console.log('✅ Usuário logado:', session.user.email);
           setUser(session.user);
           
-          // Buscar perfil apenas se necessário
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            try {
-              const userProfile = await profilesService.getCurrentProfile();
-              if (isMounted) {
-                setProfile(userProfile);
+          // Buscar perfil apenas quando necessário e com timeout para evitar loop
+          if (event === 'SIGNED_IN') {
+            setTimeout(async () => {
+              if (!isMounted) return;
+              
+              try {
+                console.log('📋 Buscando perfil do usuário...');
+                const userProfile = await profilesService.getCurrentProfile();
+                if (isMounted) {
+                  console.log('✅ Perfil carregado:', userProfile);
+                  setProfile(userProfile);
+                }
+              } catch (error) {
+                console.error('❌ Erro ao buscar perfil:', error);
+                if (isMounted) {
+                  // Criar perfil padrão se não existir
+                  setProfile({
+                    id: session.user.id,
+                    nome: session.user.email?.split('@')[0] || 'Usuário',
+                    cpf: '',
+                    telefone: '',
+                    role: 'student',
+                    status: 'ativo',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    ultimo_acesso: null,
+                    avatar_url: null
+                  });
+                }
               }
-            } catch (error) {
-              console.error('Erro ao buscar perfil:', error);
-              if (isMounted) {
-                setProfile(null);
-              }
-            }
+            }, 100);
           }
         } else {
+          console.log('🚫 Usuário deslogado');
           setUser(null);
           setProfile(null);
         }
@@ -65,26 +90,43 @@ export const useSupabaseAuth = (): UseSupabaseAuthReturn => {
     // Buscar sessão inicial
     const getInitialSession = async () => {
       try {
+        console.log('🔍 Verificando sessão inicial...');
         const { data: { session } } = await authService.supabase.auth.getSession();
         
         if (!isMounted) return;
 
         if (session?.user) {
+          console.log('✅ Sessão encontrada:', session.user.email);
           setUser(session.user);
+          
           try {
             const userProfile = await profilesService.getCurrentProfile();
             if (isMounted) {
               setProfile(userProfile);
             }
           } catch (error) {
-            console.error('Erro ao buscar perfil inicial:', error);
+            console.error('❌ Erro ao buscar perfil inicial:', error);
             if (isMounted) {
-              setProfile(null);
+              // Criar perfil padrão se não existir
+              setProfile({
+                id: session.user.id,
+                nome: session.user.email?.split('@')[0] || 'Usuário',
+                cpf: '',
+                telefone: '',
+                role: 'student',
+                status: 'ativo',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                ultimo_acesso: null,
+                avatar_url: null
+              });
             }
           }
+        } else {
+          console.log('ℹ️ Nenhuma sessão encontrada');
         }
       } catch (error) {
-        console.error('Erro ao buscar sessão inicial:', error);
+        console.error('❌ Erro ao buscar sessão inicial:', error);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -95,17 +137,21 @@ export const useSupabaseAuth = (): UseSupabaseAuthReturn => {
     getInitialSession();
 
     return () => {
+      console.log('🧹 Limpando useSupabaseAuth...');
       isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    console.log('🔐 Tentando fazer login...');
     setLoading(true);
     try {
       const result = await authService.signIn(email, password);
+      console.log('✅ Login realizado com sucesso');
       return result;
     } catch (error) {
+      console.error('❌ Erro no login:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -113,11 +159,14 @@ export const useSupabaseAuth = (): UseSupabaseAuthReturn => {
   };
 
   const signUp = async (email: string, password: string, metadata?: any) => {
+    console.log('📝 Tentando fazer cadastro...');
     setLoading(true);
     try {
       const result = await authService.signUp(email, password, metadata);
+      console.log('✅ Cadastro realizado com sucesso');
       return result;
     } catch (error) {
+      console.error('❌ Erro no cadastro:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -125,10 +174,13 @@ export const useSupabaseAuth = (): UseSupabaseAuthReturn => {
   };
 
   const signOut = async () => {
+    console.log('🚪 Fazendo logout...');
     setLoading(true);
     try {
       await authService.signOut();
+      console.log('✅ Logout realizado com sucesso');
     } catch (error) {
+      console.error('❌ Erro no logout:', error);
       throw error;
     } finally {
       setLoading(false);

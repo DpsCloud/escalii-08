@@ -17,7 +17,7 @@ import {
   ChevronRight,
   PlayCircle
 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
@@ -27,7 +27,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const location = useLocation();
-  const { user, isAdmin } = useAuth();
+  const { profile, isAdmin } = useAuth();
 
   const menuItems = [
     { 
@@ -166,17 +166,17 @@ export const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           </nav>
 
           {/* User Info */}
-          {isOpen && user && (
+          {isOpen && profile && (
             <div className="p-4 border-t border-blue-500">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                   <span className="text-sm font-medium text-white">
-                    {user.email?.charAt(0).toUpperCase() || 'U'}
+                    {profile.nome?.charAt(0).toUpperCase() || 'U'}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-white truncate">
-                    {user.email}
+                    {profile.nome}
                   </p>
                   <p className="text-xs text-blue-200 truncate">
                     {isAdmin ? 'Administrador' : 'Usuário'}

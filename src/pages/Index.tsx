@@ -9,10 +9,12 @@ import AttendanceForm from '@/components/AttendanceForm';
 import Notifications from '@/components/Notifications';
 import CourseProgress from '@/components/CourseProgress';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 
 const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
+  const { profile } = useAuth();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -36,7 +38,9 @@ const Index = () => {
         <main className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-6">
           {/* Welcome Section */}
           <div className="mb-4 sm:mb-6">
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-1">Olá, João!</h1>
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-1">
+              Olá, {profile?.nome || 'Usuário'}!
+            </h1>
             <p className="text-xs sm:text-sm md:text-base text-gray-600">
               Bem-vindo ao seu dashboard do curso ESCALI Capacitação de Líderes - Turma 2025.1
             </p>

@@ -10,12 +10,12 @@ import AttendanceForm from '@/components/AttendanceForm';
 import Notifications from '@/components/Notifications';
 import CourseProgress from '@/components/CourseProgress';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
-  const { isAdmin } = useAuth();
+  const { isAdmin, profile } = useAuth();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -40,7 +40,7 @@ const Dashboard = () => {
           {/* Welcome Section */}
           <div className="mb-4 sm:mb-6">
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-1">
-              {isAdmin ? 'Painel Administrativo' : 'Olá, João!'}
+              {isAdmin ? 'Painel Administrativo' : `Olá, ${profile?.nome || 'Usuário'}!`}
             </h1>
             <p className="text-xs sm:text-sm md:text-base text-gray-600">
               {isAdmin 
