@@ -1,13 +1,12 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 import { Toaster } from '@/components/ui/sonner';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { SupabaseProtectedRoute } from '@/components/SupabaseProtectedRoute';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // Pages
 import Index from '@/pages/Index';
-import Login from '@/pages/Login';
 import Dashboard from '@/pages/Dashboard';
 import Alunos from '@/pages/Alunos';
 import Cursos from '@/pages/Cursos';
@@ -27,82 +26,81 @@ import './App.css';
 function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
+      <SupabaseAuthProvider>
         <Router>
           <div className="min-h-screen bg-background">
             <Routes>
-              <Route path="/login" element={<Login />} />
               <Route path="/" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute>
                   <Index />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="/dashboard" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute>
                   <Dashboard />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="/alunos" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute requiredRole="admin">
                   <Alunos />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="/cursos" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute>
                   <Cursos />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="/usuarios" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute requiredRole="admin">
                   <Usuarios />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="/relatorios" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute>
                   <Relatorios />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="/aulas" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute>
                   <Aulas />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="/aulas-admin" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute>
                   <AulasAdmin />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="/aula/:id" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute>
                   <AulaDetalhes />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="/calendario" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute>
                   <Calendario />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="/presenca" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute>
                   <Presenca />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="/materiais" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute>
                   <Materiais />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="/certificado" element={
-                <ProtectedRoute>
+                <SupabaseProtectedRoute>
                   <Certificado />
-                </ProtectedRoute>
+                </SupabaseProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
           </div>
         </Router>
-      </AuthProvider>
+      </SupabaseAuthProvider>
     </ErrorBoundary>
   );
 }
