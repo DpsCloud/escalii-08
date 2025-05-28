@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -10,27 +11,43 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Eye, Edit, Trash2, Plus, Search, Filter } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useUserStore } from '@/stores/useUserStore';
 import { UserForm } from '@/components/UserForm';
 import { toast } from '@/components/ui/use-toast';
+import { profilesService } from '@/services/supabaseServices';
 
 const Usuarios = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
   const isMobile = useIsMobile();
   const { isAdmin } = useAuth();
 
-  const {
-    searchTerm,
-    filterType,
-    setSearchTerm,
-    setFilterType,
-    getFilteredUsuarios,
-    deleteUsuario
-  } = useUserStore();
+  useEffect(() => {
+    const fetchUsuarios = async () => {
+      try {
+        setLoading(true);
+        const data = await profilesService.getAllProfiles();
+        setUsuarios(data || []);
+      } catch (error) {
+        console.error('Erro ao carregar usuários:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os usuários.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const filteredUsuarios = getFilteredUsuarios();
+    if (isAdmin) {
+      fetchUsuarios();
+    }
+  }, [isAdmin]);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -41,13 +58,21 @@ const Usuarios = () => {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (usuario: any) => {
+  const handleDelete = async (usuario: any) => {
     if (window.confirm(`Tem certeza que deseja excluir o usuário ${usuario.nome}?`)) {
-      deleteUsuario(usuario.id);
-      toast({
-        title: "Usuário excluído",
-        description: "O usuário foi excluído com sucesso.",
-      });
+      try {
+        // Note: Implementar delete no profilesService se necessário
+        toast({
+          title: "Aviso",
+          description: "Funcionalidade de exclusão será implementada em breve.",
+        });
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível excluir o usuário.",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -55,6 +80,20 @@ const Usuarios = () => {
     setIsFormOpen(false);
     setEditingUser(null);
   };
+
+  const getFilteredUsuarios = () => {
+    return usuarios.filter(usuario => {
+      const matchesSearch = usuario.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           usuario.cpf?.includes(searchTerm) ||
+                           usuario.id?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesFilter = filterType === 'all' || usuario.role === filterType;
+      
+      return matchesSearch && matchesFilter;
+    });
+  };
+
+  const filteredUsuarios = getFilteredUsuarios();
 
   if (!isAdmin) {
     return (
@@ -114,7 +153,8 @@ const Usuarios = () => {
                     <SelectContent>
                       <SelectItem value="all">Todos os tipos</SelectItem>
                       <SelectItem value="admin">Administradores</SelectItem>
-                      <SelectItem value="instrutor">Instrutores</SelectItem>
+                      <SelectItem value="instructor">Instrutores</SelectItem>
+                      <SelectItem value="student">Estudantes</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -122,67 +162,73 @@ const Usuarios = () => {
             </div>
 
             {/* Tabela */}
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>CPF</TableHead>
-                    <TableHead className="hidden md:table-cell">Email</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead className="hidden lg:table-cell">Último Acesso</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsuarios.map((usuario) => (
-                    <TableRow key={usuario.id}>
-                      <TableCell className="font-medium">{usuario.nome}</TableCell>
-                      <TableCell>{usuario.cpf}</TableCell>
-                      <TableCell className="hidden md:table-cell">{usuario.email}</TableCell>
-                      <TableCell>
-                        <Badge variant={usuario.tipoUsuario === 'admin' ? 'default' : 'secondary'}>
-                          {usuario.tipoUsuario === 'admin' ? 'Administrador' : 'Instrutor'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        {new Date(usuario.ultimoAcesso).toLocaleDateString('pt-BR')}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={usuario.status === 'ativo' ? 'default' : 'secondary'}>
-                          {usuario.status === 'ativo' ? 'Ativo' : 'Inativo'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEdit(usuario)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => handleDelete(usuario)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+            {loading ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Carregando usuários...</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>CPF</TableHead>
+                      <TableHead className="hidden md:table-cell">Telefone</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead className="hidden lg:table-cell">Último Acesso</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Ações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsuarios.map((usuario) => (
+                      <TableRow key={usuario.id}>
+                        <TableCell className="font-medium">{usuario.nome}</TableCell>
+                        <TableCell>{usuario.cpf}</TableCell>
+                        <TableCell className="hidden md:table-cell">{usuario.telefone}</TableCell>
+                        <TableCell>
+                          <Badge variant={usuario.role === 'admin' ? 'default' : usuario.role === 'instructor' ? 'secondary' : 'outline'}>
+                            {usuario.role === 'admin' ? 'Administrador' : usuario.role === 'instructor' ? 'Instrutor' : 'Estudante'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">
+                          {usuario.ultimo_acesso ? new Date(usuario.ultimo_acesso).toLocaleDateString('pt-BR') : 'Nunca'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={usuario.status === 'ativo' ? 'default' : 'secondary'}>
+                            {usuario.status === 'ativo' ? 'Ativo' : 'Inativo'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEdit(usuario)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => handleDelete(usuario)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
 
-            {filteredUsuarios.length === 0 && (
+            {!loading && filteredUsuarios.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-gray-500">Nenhum usuário encontrado</p>
               </div>

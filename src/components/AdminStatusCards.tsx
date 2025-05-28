@@ -1,42 +1,82 @@
 
-import { useEffect } from 'react';
-import { useStudentStore } from '@/stores/useStudentStore';
+import { useEffect, useState } from 'react';
+import { studentsService, coursesService } from '@/services/supabaseServices';
 
 const AdminStatusCards = () => {
-  const { students } = useStudentStore();
-
-  // Calcular estatísticas dos alunos
-  const totalAlunos = students.length;
-  const alunosAtivos = students.filter(student => student.status === 'ativo').length;
-  const alunosFormados = students.filter(student => student.status === 'formado').length;
-  const presencaMedia = students.length > 0 
-    ? Math.round(students.reduce((acc, student) => acc + student.presencaGeral, 0) / students.length)
-    : 0;
+  const [stats, setStats] = useState({
+    totalAlunos: 0,
+    totalCursos: 0,
+    turmasAtivas: 0,
+    proximasFormaturas: 0,
+    presencaMedia: 0,
+    aproveitamento: 0
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Progress ring animation para presença média
-    const circle = document.querySelector('.admin-progress-ring__circle:last-child');
-    if (circle) {
-      const radius = (circle as SVGCircleElement).r.baseVal.value;
-      const circumference = radius * 2 * Math.PI;
-      
-      (circle as SVGCircleElement).style.strokeDasharray = `${circumference} ${circumference}`;
-      
-      function setProgress(percent: number) {
-        const offset = circumference - percent / 100 * circumference;
-        (circle as SVGCircleElement).style.strokeDashoffset = `${offset}`;
+    const fetchStats = async () => {
+      try {
+        const [students, courses] = await Promise.all([
+          studentsService.getAllStudents(),
+          coursesService.getAllCourses()
+        ]);
+
+        const totalAlunos = students.length;
+        const totalCursos = courses.length;
+        const turmasAtivas = courses.filter(c => c.status === 'ativo').length;
+        const proximasFormaturas = students.filter(s => s.progresso >= 90).length;
+        
+        const presencaMedia = students.length > 0 
+          ? Math.round(students.reduce((sum, s) => sum + (s.presenca_geral || 0), 0) / students.length)
+          : 0;
+        
+        const aproveitamento = students.length > 0
+          ? Math.round(students.reduce((sum, s) => sum + (s.aproveitamento || 0), 0) / students.length)
+          : 0;
+
+        setStats({
+          totalAlunos,
+          totalCursos,
+          turmasAtivas,
+          proximasFormaturas,
+          presencaMedia,
+          aproveitamento
+        });
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error);
+      } finally {
+        setLoading(false);
       }
-      
-      setProgress(presencaMedia);
-    }
-  }, [presencaMedia]);
+    };
+
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="card bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded mb-4"></div>
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-gray-200 rounded-full mr-4"></div>
+              <div className="flex-1">
+                <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
-      <div className="card bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6 hover:shadow-md transition-all duration-300">
+      <div className="card bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6">
         <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h3 className="text-xs sm:text-sm font-semibold text-gray-500">TOTAL DE ALUNOS</h3>
-          <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">Geral</div>
+          <h3 className="text-xs sm:text-sm font-semibold text-gray-500">TOTAL ALUNOS</h3>
+          <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">Ativo</div>
         </div>
         <div className="flex items-center">
           <div className="p-2 sm:p-3 bg-blue-100 rounded-full mr-2 sm:mr-3 md:mr-4 flex-shrink-0">
@@ -45,62 +85,66 @@ const AdminStatusCards = () => {
             </svg>
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-800">{totalAlunos}</p>
-            <p className="text-gray-500 text-xs sm:text-sm">alunos matriculados</p>
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats.totalAlunos}</p>
+            <p className="text-gray-500 text-xs sm:text-sm">Estudantes matriculados</p>
           </div>
         </div>
       </div>
 
-      <div className="card bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6 hover:shadow-md transition-all duration-300">
+      <div className="card bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6">
         <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h3 className="text-xs sm:text-sm font-semibold text-gray-500">ALUNOS ATIVOS</h3>
-          <div className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">Ativo</div>
+          <h3 className="text-xs sm:text-sm font-semibold text-gray-500">CURSOS</h3>
+          <div className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">{stats.turmasAtivas} Ativas</div>
         </div>
         <div className="flex items-center">
           <div className="p-2 sm:p-3 bg-green-100 rounded-full mr-2 sm:mr-3 md:mr-4 flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
             </svg>
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-800">{alunosAtivos}</p>
-            <p className="text-gray-500 text-xs sm:text-sm">em andamento</p>
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats.totalCursos}</p>
+            <p className="text-gray-500 text-xs sm:text-sm">Cursos disponíveis</p>
           </div>
         </div>
       </div>
 
-      <div className="card bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6 hover:shadow-md transition-all duration-300">
+      <div className="card bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6">
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h3 className="text-xs sm:text-sm font-semibold text-gray-500">PRESENÇA MÉDIA</h3>
           <div className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-            presencaMedia >= 80 ? 'bg-green-100 text-green-800' : 
-            presencaMedia >= 60 ? 'bg-yellow-100 text-yellow-800' : 
+            stats.presencaMedia >= 85 ? 'bg-green-100 text-green-800' : 
+            stats.presencaMedia >= 70 ? 'bg-yellow-100 text-yellow-800' : 
             'bg-red-100 text-red-800'
           }`}>
-            {presencaMedia >= 80 ? 'Excelente' : presencaMedia >= 60 ? 'Bom' : 'Baixo'}
+            {stats.presencaMedia >= 85 ? 'Excelente' : stats.presencaMedia >= 70 ? 'Bom' : 'Baixa'}
           </div>
         </div>
         <div className="flex items-center">
-          <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mr-2 sm:mr-3 md:mr-4 flex-shrink-0">
-            <svg className="admin-progress-ring w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 transform -rotate-90" width="48" height="48" viewBox="0 0 60 60">
-              <circle className="admin-progress-ring__circle" stroke="#e5e7eb" strokeWidth="6" fill="transparent" r="25" cx="30" cy="30"></circle>
-              <circle className="admin-progress-ring__circle" stroke="#10b981" strokeWidth="6" fill="transparent" r="25" cx="30" cy="30"></circle>
+          <div className={`p-2 sm:p-3 rounded-full mr-2 sm:mr-3 md:mr-4 flex-shrink-0 ${
+            stats.presencaMedia >= 85 ? 'bg-green-100' : 
+            stats.presencaMedia >= 70 ? 'bg-yellow-100' : 
+            'bg-red-100'
+          }`}>
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 ${
+              stats.presencaMedia >= 85 ? 'text-green-600' : 
+              stats.presencaMedia >= 70 ? 'text-yellow-600' : 
+              'text-red-600'
+            }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center text-sm sm:text-base md:text-lg font-bold">
-              {presencaMedia}%
-            </div>
           </div>
           <div>
-            <p className="text-gray-800 font-medium text-xs sm:text-sm md:text-base">Média geral</p>
-            <p className="text-gray-500 text-xs sm:text-sm">{totalAlunos} alunos</p>
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats.presencaMedia}%</p>
+            <p className="text-gray-500 text-xs sm:text-sm">Média de presença</p>
           </div>
         </div>
       </div>
 
-      <div className="card bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6 hover:shadow-md transition-all duration-300">
+      <div className="card bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6">
         <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h3 className="text-xs sm:text-sm font-semibold text-gray-500">FORMADOS</h3>
-          <div className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded-full">Concluído</div>
+          <h3 className="text-xs sm:text-sm font-semibold text-gray-500">APROVEITAMENTO</h3>
+          <div className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded-full">{stats.proximasFormaturas} Formandos</div>
         </div>
         <div className="flex items-center">
           <div className="p-2 sm:p-3 bg-purple-100 rounded-full mr-2 sm:mr-3 md:mr-4 flex-shrink-0">
@@ -109,8 +153,8 @@ const AdminStatusCards = () => {
             </svg>
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-800">{alunosFormados}</p>
-            <p className="text-gray-500 text-xs sm:text-sm">certificados emitidos</p>
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats.aproveitamento}%</p>
+            <p className="text-gray-500 text-xs sm:text-sm">Média geral</p>
           </div>
         </div>
       </div>

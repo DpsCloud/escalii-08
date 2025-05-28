@@ -1,63 +1,118 @@
 
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { coursesService } from '@/services/supabaseServices';
+import { Calendar, Clock, Users, MapPin } from 'lucide-react';
+
 const UpcomingClasses = () => {
-  return (
-    <div className="bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6">
-      <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Próximas Aulas</h3>
-      <div className="space-y-2 sm:space-y-3 md:space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center p-2 sm:p-3 md:p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-          <div className="flex-shrink-0 sm:mr-3 md:mr-4 mb-2 sm:mb-0">
-            <div className="bg-blue-100 rounded-lg p-1.5 sm:p-2 text-center w-12 sm:w-14">
-              <span className="block text-xs sm:text-sm text-blue-800 font-medium">JUN</span>
-              <span className="block text-lg sm:text-xl text-blue-800 font-bold">15</span>
-            </div>
-          </div>
-          <div className="flex-1 mb-2 sm:mb-0">
-            <h4 className="font-semibold text-gray-800 text-sm sm:text-base">Aula 6: 9 Dimensões da Imaturidade</h4>
-            <p className="text-xs sm:text-sm text-gray-600">Quarta-feira, 19:30 - 21:30</p>
-          </div>
-          <div className="flex-shrink-0 w-full sm:w-auto">
-            <button className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-white rounded-lg hover:bg-primary-deep transition-colors text-sm">
-              Detalhes
-            </button>
-          </div>
-        </div>
+  const { profile } = useAuth();
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center p-2 sm:p-3 md:p-4 bg-secondary rounded-lg">
-          <div className="flex-shrink-0 sm:mr-3 md:mr-4 mb-2 sm:mb-0">
-            <div className="bg-muted rounded-lg p-1.5 sm:p-2 text-center w-12 sm:w-14">
-              <span className="block text-xs sm:text-sm text-gray-600 font-medium">JUN</span>
-              <span className="block text-lg sm:text-xl text-gray-800 font-bold">22</span>
-            </div>
-          </div>
-          <div className="flex-1 mb-2 sm:mb-0">
-            <h4 className="font-semibold text-gray-800 text-sm sm:text-base">Aula 7: Propósito da Mesa</h4>
-            <p className="text-xs sm:text-sm text-gray-600">Quarta-feira, 19:30 - 21:30</p>
-          </div>
-          <div className="flex-shrink-0 w-full sm:w-auto">
-            <button className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 bg-muted text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm">
-              Detalhes
-            </button>
-          </div>
-        </div>
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const data = await coursesService.getAllCourses();
+        // Filtrar apenas cursos ativos
+        const activeCourses = data.filter(course => course.status === 'ativo');
+        setCourses(activeCourses);
+      } catch (error) {
+        console.error('Erro ao carregar cursos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center p-2 sm:p-3 md:p-4 bg-secondary rounded-lg">
-          <div className="flex-shrink-0 sm:mr-3 md:mr-4 mb-2 sm:mb-0">
-            <div className="bg-muted rounded-lg p-1.5 sm:p-2 text-center w-12 sm:w-14">
-              <span className="block text-xs sm:text-sm text-gray-600 font-medium">JUN</span>
-              <span className="block text-lg sm:text-xl text-gray-800 font-bold">29</span>
+    fetchCourses();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+        <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">Próximas Aulas</h2>
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="h-4 bg-gray-200 rounded mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
             </div>
-          </div>
-          <div className="flex-1 mb-2 sm:mb-0">
-            <h4 className="font-semibold text-gray-800 text-sm sm:text-base">Aula 8: 8 Características de um Líder</h4>
-            <p className="text-xs sm:text-sm text-gray-600">Quarta-feira, 19:30 - 21:30</p>
-          </div>
-          <div className="flex-shrink-0 w-full sm:w-auto">
-            <button className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 bg-muted text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm">
-              Detalhes
-            </button>
-          </div>
+          ))}
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-xl font-bold text-gray-800">Próximas Aulas</h2>
+        <Calendar className="h-5 w-5 text-gray-400" />
+      </div>
+
+      <div className="space-y-3 sm:space-y-4">
+        {courses.length === 0 ? (
+          <div className="text-center py-8">
+            <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500">Nenhum curso ativo encontrado</p>
+          </div>
+        ) : (
+          courses.map((course) => (
+            <div key={course.id} className="border-l-4 border-blue-500 pl-4 py-3 hover:bg-gray-50 transition-colors rounded-r-lg">
+              <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-800 text-sm sm:text-base truncate">
+                    {course.nome}
+                  </h3>
+                  <p className="text-gray-600 text-xs sm:text-sm mt-1 line-clamp-2">
+                    {course.descricao}
+                  </p>
+                  
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      <span>{course.carga_horaria}h</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      <span>{course.max_alunos} vagas</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      <span>Presencial/Online</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col items-end ml-2 sm:ml-4">
+                  <div className="text-right">
+                    <p className="text-xs sm:text-sm font-medium text-gray-800">
+                      {new Date(course.data_inicio).toLocaleDateString('pt-BR')}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      até {new Date(course.data_fim).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                  <div className={`mt-2 px-2 py-1 rounded-full text-xs font-medium ${
+                    course.inscricoes_abertas 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {course.inscricoes_abertas ? 'Inscrições Abertas' : 'Fechado'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {courses.length > 0 && (
+        <div className="mt-4 sm:mt-6 pt-4 border-t">
+          <button className="w-full text-blue-600 hover:text-blue-800 text-sm font-medium py-2 transition-colors">
+            Ver todos os cursos →
+          </button>
+        </div>
+      )}
     </div>
   );
 };
