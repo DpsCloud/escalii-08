@@ -25,7 +25,25 @@ const AulasAdmin = () => {
     const fetchAulas = async () => {
       try {
         const data = await aulasService.getAllAulas();
-        setAulas(data);
+        // Map Supabase data to Aula type
+        const mappedAulas = data.map(supabaseAula => ({
+          id: supabaseAula.id,
+          titulo: supabaseAula.titulo,
+          descricao: supabaseAula.descricao,
+          duracao: supabaseAula.duracao,
+          status: supabaseAula.status as 'ativa' | 'planejada' | 'concluida',
+          categoria: supabaseAula.categoria,
+          tags: supabaseAula.tags || [],
+          videoUrl: supabaseAula.video_url,
+          createdAt: supabaseAula.created_at || '',
+          updatedAt: supabaseAula.updated_at || '',
+          materiais: [],
+          objetivos: supabaseAula.objetivos || [],
+          prerequisitos: supabaseAula.prerequisitos || [],
+          conteudoTexto: supabaseAula.conteudo_texto,
+          nivelDificuldade: supabaseAula.nivel_dificuldade || 1
+        }));
+        setAulas(mappedAulas);
       } catch (error) {
         console.error('Erro ao carregar aulas:', error);
       } finally {

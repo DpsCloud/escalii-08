@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
@@ -42,10 +41,6 @@ const Materiais = () => {
     fetchMateriais();
   }, []);
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   const materiaisFiltrados = filtroTipo === 'todos' 
     ? materiais 
     : materiais.filter(material => material.tipo === filtroTipo);
@@ -87,6 +82,10 @@ const Materiais = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
   if (loading) {
@@ -191,10 +190,10 @@ const Materiais = () => {
                         </div>
                         <span>•</span>
                         <span>{formatFileSize(material.tamanho_arquivo)}</span>
-                        {material.aula && (
+                        {material.aulas && (
                           <>
                             <span>•</span>
-                            <span className="text-blue-600">{material.aula.titulo}</span>
+                            <span className="text-blue-600">{material.aulas.titulo}</span>
                           </>
                         )}
                       </div>
