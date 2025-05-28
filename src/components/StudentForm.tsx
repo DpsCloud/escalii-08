@@ -58,7 +58,7 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
     }
   });
 
-  const [selectedCourse, setSelectedCourse] = useState(editingStudent?.curso || '');
+  const [selectedCourse, setSelectedCourse] = useState(editingStudent?.curso || 'none');
 
   const onSubmit = async (data: StudentFormData) => {
     setIsSubmitting(true);
@@ -79,7 +79,7 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
           cep: data.endereco.cep || '',
           estado: data.endereco.estado || ''
         } : undefined,
-        curso: selectedCourse || undefined,
+        curso: selectedCourse === 'none' ? undefined : selectedCourse,
         turma: editingStudent?.turma,
         progresso: editingStudent?.progresso || 0,
         status: data.status,
@@ -320,7 +320,7 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
                     <SelectValue placeholder="Selecione um curso" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhum curso</SelectItem>
+                    <SelectItem value="none">Nenhum curso</SelectItem>
                     <SelectItem value="ESCALI 2025.1">ESCALI 2025.1</SelectItem>
                     <SelectItem value="ESCALI 2024.2">ESCALI 2024.2</SelectItem>
                   </SelectContent>
