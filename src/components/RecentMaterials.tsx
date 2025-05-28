@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { materialsService } from '@/services/supabaseServices';
 import { FileText, Download, Eye, Calendar } from 'lucide-react';
 
 const RecentMaterials = () => {
@@ -11,36 +12,8 @@ const RecentMaterials = () => {
   useEffect(() => {
     const fetchMaterials = async () => {
       try {
-        // Por enquanto usando dados estáticos até implementar a busca real
-        // TODO: Implementar busca de materiais do Supabase
-        const mockMaterials = [
-          {
-            id: 1,
-            nome: 'Guia de Liderança Cristã.pdf',
-            tipo: 'pdf',
-            tamanho_arquivo: 2048000,
-            created_at: '2025-05-20T10:00:00Z',
-            aula: 'Fundamentos da Liderança'
-          },
-          {
-            id: 2,
-            nome: 'Vídeo - Caráter do Líder.mp4',
-            tipo: 'video',
-            tamanho_arquivo: 15728640,
-            created_at: '2025-05-18T14:30:00Z',
-            aula: 'Desenvolvimento de Caráter'
-          },
-          {
-            id: 3,
-            nome: 'Exercícios de Comunicação.docx',
-            tipo: 'document',
-            tamanho_arquivo: 512000,
-            created_at: '2025-05-15T09:15:00Z',
-            aula: 'Comunicação Eficaz'
-          }
-        ];
-        
-        setMaterials(mockMaterials);
+        const data = await materialsService.getRecentMaterials(5);
+        setMaterials(data);
       } catch (error) {
         console.error('Erro ao carregar materiais:', error);
       } finally {
@@ -52,7 +25,7 @@ const RecentMaterials = () => {
   }, []);
 
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (!bytes || bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -67,6 +40,8 @@ const RecentMaterials = () => {
         return <FileText className="h-5 w-5 text-blue-500" />;
       case 'document':
         return <FileText className="h-5 w-5 text-blue-600" />;
+      case 'image':
+        return <FileText className="h-5 w-5 text-green-500" />;
       default:
         return <FileText className="h-5 w-5 text-gray-500" />;
     }
@@ -121,8 +96,8 @@ const RecentMaterials = () => {
                     <span>•</span>
                     <span>{formatFileSize(material.tamanho_arquivo)}</span>
                   </div>
-                  {material.aula && (
-                    <p className="text-xs text-blue-600 mt-1">{material.aula}</p>
+                  {material.aulas && (
+                    <p className="text-xs text-blue-600 mt-1">{material.aulas.titulo}</p>
                   )}
                 </div>
               </div>
@@ -131,7 +106,10 @@ const RecentMaterials = () => {
                 <button className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
                   <Eye className="h-4 w-4" />
                 </button>
-                <button className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors">
+                <button 
+                  className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
+                  onClick={() => window.open(material.url, '_blank')}
+                >
                   <Download className="h-4 w-4" />
                 </button>
               </div>

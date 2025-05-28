@@ -19,6 +19,19 @@ type Aula = Database['public']['Tables']['aulas']['Row'];
 type AulaInsert = Database['public']['Tables']['aulas']['Insert'];
 type AulaUpdate = Database['public']['Tables']['aulas']['Update'];
 
+type Turma = Database['public']['Tables']['turmas']['Row'];
+type TurmaInsert = Database['public']['Tables']['turmas']['Insert'];
+type TurmaUpdate = Database['public']['Tables']['turmas']['Update'];
+
+type Material = Database['public']['Tables']['materials']['Row'];
+type MaterialInsert = Database['public']['Tables']['materials']['Insert'];
+
+type Notification = Database['public']['Tables']['notifications']['Row'];
+type NotificationInsert = Database['public']['Tables']['notifications']['Insert'];
+
+type Presenca = Database['public']['Tables']['presencas']['Row'];
+type PresencaInsert = Database['public']['Tables']['presencas']['Insert'];
+
 // ===================================
 // PROFILES SERVICES
 // ===================================
@@ -65,12 +78,12 @@ export const profilesService = {
 };
 
 // ===================================
-// STUDENTS SERVICES
+// STUDENTS SERVICES (Alunos)
 // ===================================
 
-export const studentsService = {
+export const alunosService = {
   // Buscar todos os alunos
-  async getAllStudents() {
+  async getAllAlunos() {
     const { data, error } = await supabase
       .from('students')
       .select(`
@@ -79,8 +92,7 @@ export const studentsService = {
           id,
           nome,
           cpf,
-          telefone,
-          email:id
+          telefone
         ),
         turmas:turma_id (
           id,
@@ -97,8 +109,8 @@ export const studentsService = {
     return data;
   },
 
-  // Buscar dados do estudante atual
-  async getCurrentStudentData() {
+  // Buscar dados do aluno atual
+  async getCurrentAlunoData() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Usuário não autenticado');
 
@@ -129,15 +141,15 @@ export const studentsService = {
     return data;
   },
 
-  // Criar dados de estudante
-  async createStudent(studentData: Omit<StudentInsert, 'profile_id'>) {
+  // Criar dados de aluno
+  async createAluno(alunoData: Omit<StudentInsert, 'profile_id'>) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Usuário não autenticado');
 
     const { data, error } = await supabase
       .from('students')
       .insert({
-        ...studentData,
+        ...alunoData,
         profile_id: user.id
       })
       .select()
@@ -147,14 +159,24 @@ export const studentsService = {
     return data;
   },
 
-  // Atualizar dados de estudante
-  async updateStudent(id: string, updates: StudentUpdate) {
+  // Atualizar dados de aluno
+  async updateAluno(id: string, updates: StudentUpdate) {
     const { data, error } = await supabase
       .from('students')
       .update(updates)
       .eq('id', id)
       .select()
       .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Buscar aniversariantes do mês
+  async getAniversariantes() {
+    const { data, error } = await supabase
+      .from('aniversariantes_mes')
+      .select('*');
 
     if (error) throw error;
     return data;
@@ -235,6 +257,81 @@ export const coursesService = {
 };
 
 // ===================================
+// TURMAS SERVICES
+// ===================================
+
+export const turmasService = {
+  // Buscar todas as turmas
+  async getAllTurmas() {
+    const { data, error } = await supabase
+      .from('turmas')
+      .select(`
+        *,
+        courses:course_id (
+          id,
+          nome,
+          descricao
+        ),
+        instructors:instructor_id (
+          id,
+          profiles:profile_id (
+            nome
+          )
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Buscar turma ativa
+  async getTurmaAtiva() {
+    const { data, error } = await supabase
+      .from('turmas')
+      .select(`
+        *,
+        courses:course_id (
+          id,
+          nome,
+          descricao,
+          total_aulas
+        )
+      `)
+      .eq('status', 'ativo')
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  },
+
+  // Criar turma
+  async createTurma(turmaData: TurmaInsert) {
+    const { data, error } = await supabase
+      .from('turmas')
+      .insert(turmaData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Ativar turma (automaticamente desativa as outras)
+  async ativarTurma(id: string) {
+    const { data, error } = await supabase
+      .from('turmas')
+      .update({ status: 'ativo' })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+};
+
+// ===================================
 // AULAS SERVICES
 // ===================================
 
@@ -245,6 +342,22 @@ export const aulasService = {
       .from('aulas')
       .select('*')
       .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Buscar aulas por categoria
+  async getAulasByCategoria(categoria?: string) {
+    let query = supabase
+      .from('aulas')
+      .select('*');
+
+    if (categoria) {
+      query = query.eq('categoria', categoria);
+    }
+
+    const { data, error } = await query.order('titulo');
 
     if (error) throw error;
     return data;
@@ -283,6 +396,262 @@ export const aulasService = {
       .eq('id', id);
 
     if (error) throw error;
+  }
+};
+
+// ===================================
+// MATERIALS SERVICES
+// ===================================
+
+export const materialsService = {
+  // Buscar materiais recentes
+  async getRecentMaterials(limit = 10) {
+    const { data, error } = await supabase
+      .from('materials')
+      .select(`
+        *,
+        aulas:aula_id (
+          id,
+          titulo
+        )
+      `)
+      .eq('publico', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Buscar todos os materiais
+  async getAllMaterials() {
+    const { data, error } = await supabase
+      .from('materials')
+      .select(`
+        *,
+        aulas:aula_id (
+          id,
+          titulo
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Criar material
+  async createMaterial(materialData: MaterialInsert) {
+    const { data, error } = await supabase
+      .from('materials')
+      .insert(materialData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+};
+
+// ===================================
+// NOTIFICATIONS SERVICES
+// ===================================
+
+export const notificationsService = {
+  // Buscar notificações do usuário atual
+  async getUserNotifications(limit = 10) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Usuário não autenticado');
+
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('profile_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Marcar notificação como lida
+  async markAsRead(id: string) {
+    const { data, error } = await supabase
+      .from('notifications')
+      .update({ 
+        lida: true, 
+        data_leitura: new Date().toISOString() 
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Criar notificação
+  async createNotification(notificationData: NotificationInsert) {
+    const { data, error } = await supabase
+      .from('notifications')
+      .insert(notificationData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+};
+
+// ===================================
+// PRESENCAS SERVICES
+// ===================================
+
+export const presencasService = {
+  // Registrar presença
+  async registrarPresenca(presencaData: PresencaInsert) {
+    const { data, error } = await supabase
+      .from('presencas')
+      .insert(presencaData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Buscar presenças do aluno
+  async getPresencasAluno(studentId: string) {
+    const { data, error } = await supabase
+      .from('presencas')
+      .select(`
+        *,
+        course_aulas:course_aula_id (
+          id,
+          data_aula,
+          horario_inicio,
+          aulas:aula_id (
+            titulo
+          )
+        )
+      `)
+      .eq('student_id', studentId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Marcar aula como concluída
+  async marcarAulaConcluida(presencaId: string) {
+    const { data, error } = await supabase
+      .from('presencas')
+      .update({ aula_concluida: true })
+      .eq('id', presencaId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+};
+
+// ===================================
+// INSTRUCTORS SERVICES
+// ===================================
+
+export const instructorsService = {
+  // Buscar todos os instrutores
+  async getAllInstructors() {
+    const { data, error } = await supabase
+      .from('instructors')
+      .select(`
+        *,
+        profiles:profile_id (
+          id,
+          nome,
+          cpf,
+          telefone
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Criar instrutor
+  async createInstructor(instructorData: any) {
+    const { data, error } = await supabase
+      .from('instructors')
+      .insert(instructorData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+};
+
+// ===================================
+// STATISTICS SERVICES
+// ===================================
+
+export const statisticsService = {
+  // Estatísticas para admin
+  async getAdminStats() {
+    const [alunos, cursos, turmaAtiva, aniversariantes] = await Promise.all([
+      alunosService.getAllAlunos(),
+      coursesService.getAllCourses(),
+      turmasService.getTurmaAtiva(),
+      alunosService.getAniversariantes()
+    ]);
+
+    const totalAlunos = alunos.length;
+    const totalCursos = cursos.length;
+    const turmasAtivas = turmaAtiva ? 1 : 0;
+    const proximasFormaturas = alunos.filter(a => a.progresso >= 90).length;
+    
+    const presencaMedia = alunos.length > 0 
+      ? Math.round(alunos.reduce((sum, a) => sum + (a.presenca_geral || 0), 0) / alunos.length)
+      : 0;
+    
+    const aproveitamento = alunos.length > 0
+      ? Math.round(alunos.reduce((sum, a) => sum + (a.aproveitamento || 0), 0) / alunos.length)
+      : 0;
+
+    return {
+      totalAlunos,
+      totalCursos,
+      turmasAtivas,
+      proximasFormaturas,
+      presencaMedia,
+      aproveitamento,
+      aniversariantes: aniversariantes.length
+    };
+  },
+
+  // Estatísticas para aluno
+  async getStudentStats() {
+    const alunoData = await alunosService.getCurrentAlunoData();
+    
+    if (!alunoData) {
+      return {
+        progresso: 0,
+        presencaGeral: 0,
+        aulasAssistidas: 0,
+        certificadoDisponivel: false,
+        turma: null
+      };
+    }
+
+    return {
+      progresso: alunoData.progresso || 0,
+      presencaGeral: alunoData.presenca_geral || 0,
+      aulasAssistidas: alunoData.aulas_assistidas || 0,
+      certificadoDisponivel: alunoData.certificado_disponivel || false,
+      turma: alunoData.turmas
+    };
   }
 };
 
@@ -373,3 +742,6 @@ export const supabaseUtils = {
     }
   }
 };
+
+// Backward compatibility - mantém as exportações antigas
+export const studentsService = alunosService;

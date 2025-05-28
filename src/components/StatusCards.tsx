@@ -1,34 +1,40 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
-import { studentsService } from '@/services/supabaseServices';
+import { statisticsService } from '@/services/supabaseServices';
 
 const StatusCards = () => {
   const { profile } = useAuth();
-  const [studentData, setStudentData] = useState(null);
+  const [studentStats, setStudentStats] = useState({
+    progresso: 0,
+    presencaGeral: 0,
+    aulasAssistidas: 0,
+    certificadoDisponivel: false,
+    turma: null
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStudentData = async () => {
+    const fetchStudentStats = async () => {
       if (!profile) return;
       
       try {
-        const data = await studentsService.getCurrentStudentData();
-        setStudentData(data);
+        const data = await statisticsService.getStudentStats();
+        setStudentStats(data);
       } catch (error) {
-        console.error('Erro ao carregar dados do estudante:', error);
+        console.error('Erro ao carregar estatísticas do aluno:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStudentData();
+    fetchStudentStats();
   }, [profile]);
 
   useEffect(() => {
     // Progress ring animation
     const circle = document.querySelector('.progress-ring__circle:last-child');
-    if (circle && studentData) {
+    if (circle && studentStats) {
       const radius = (circle as SVGCircleElement).r.baseVal.value;
       const circumference = radius * 2 * Math.PI;
       
@@ -39,9 +45,9 @@ const StatusCards = () => {
         (circle as SVGCircleElement).style.strokeDashoffset = `${offset}`;
       }
       
-      setProgress(studentData.progresso || 0);
+      setProgress(studentStats.progresso || 0);
     }
-  }, [studentData]);
+  }, [studentStats]);
 
   if (loading) {
     return (
@@ -62,9 +68,10 @@ const StatusCards = () => {
     );
   }
 
-  const progresso = studentData?.progresso || 0;
-  const presencaGeral = studentData?.presenca_geral || 0;
-  const aulasAssistidas = studentData?.aulas_assistidas || 0;
+  const progresso = studentStats.progresso || 0;
+  const presencaGeral = studentStats.presencaGeral || 0;
+  const aulasAssistidas = studentStats.aulasAssistidas || 0;
+  const totalAulas = studentStats.turma?.courses?.total_aulas || 8;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
@@ -72,7 +79,7 @@ const StatusCards = () => {
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h3 className="text-xs sm:text-sm font-semibold text-gray-500">PROGRESSO DO CURSO</h3>
           <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
-            {aulasAssistidas}/{studentData?.turmas?.courses?.total_aulas || 8} Aulas
+            {aulasAssistidas}/{totalAulas} Aulas
           </div>
         </div>
         <div className="flex items-center">
@@ -90,7 +97,7 @@ const StatusCards = () => {
               {progresso > 70 ? 'Bom progresso!' : progresso > 40 ? 'Progredindo' : 'Iniciando'}
             </p>
             <p className="text-gray-500 text-xs sm:text-sm">
-              {studentData?.turmas?.courses?.nome || 'Curso não definido'}
+              {studentStats.turma?.courses?.nome || 'Aguardando matrícula'}
             </p>
           </div>
         </div>
@@ -150,27 +157,27 @@ const StatusCards = () => {
         <div className="flex items-center justify-between mb-3 sm:mb-4">
           <h3 className="text-xs sm:text-sm font-semibold text-gray-500">CERTIFICADO</h3>
           <div className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-            studentData?.certificado_disponivel ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+            studentStats.certificadoDisponivel ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
           }`}>
-            {studentData?.certificado_disponivel ? 'Disponível' : 'Em andamento'}
+            {studentStats.certificadoDisponivel ? 'Disponível' : 'Em andamento'}
           </div>
         </div>
         <div className="flex items-center">
           <div className={`p-2 sm:p-3 rounded-full mr-2 sm:mr-3 md:mr-4 flex-shrink-0 ${
-            studentData?.certificado_disponivel ? 'bg-green-100' : 'bg-yellow-100'
+            studentStats.certificadoDisponivel ? 'bg-green-100' : 'bg-yellow-100'
           }`}>
             <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 ${
-              studentData?.certificado_disponivel ? 'text-green-600' : 'text-yellow-600'
+              studentStats.certificadoDisponivel ? 'text-green-600' : 'text-yellow-600'
             }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
           <div>
             <p className="text-gray-800 font-medium text-xs sm:text-sm md:text-base">
-              {studentData?.certificado_disponivel ? 'Certificado pronto' : 'Disponível ao final'}
+              {studentStats.certificadoDisponivel ? 'Certificado pronto' : 'Disponível ao final'}
             </p>
             <p className="text-gray-500 text-xs sm:text-sm">
-              {studentData?.certificado_disponivel ? 'Baixar agora' : `${Math.max(0, (studentData?.turmas?.courses?.total_aulas || 8) - aulasAssistidas)} aulas restantes`}
+              {studentStats.certificadoDisponivel ? 'Baixar agora' : `${Math.max(0, totalAulas - aulasAssistidas)} aulas restantes`}
             </p>
           </div>
         </div>

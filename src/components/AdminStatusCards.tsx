@@ -1,6 +1,5 @@
-
 import { useEffect, useState } from 'react';
-import { studentsService, coursesService } from '@/services/supabaseServices';
+import { statisticsService } from '@/services/supabaseServices';
 
 const AdminStatusCards = () => {
   const [stats, setStats] = useState({
@@ -9,39 +8,16 @@ const AdminStatusCards = () => {
     turmasAtivas: 0,
     proximasFormaturas: 0,
     presencaMedia: 0,
-    aproveitamento: 0
+    aproveitamento: 0,
+    aniversariantes: 0
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [students, courses] = await Promise.all([
-          studentsService.getAllStudents(),
-          coursesService.getAllCourses()
-        ]);
-
-        const totalAlunos = students.length;
-        const totalCursos = courses.length;
-        const turmasAtivas = courses.filter(c => c.status === 'ativo').length;
-        const proximasFormaturas = students.filter(s => s.progresso >= 90).length;
-        
-        const presencaMedia = students.length > 0 
-          ? Math.round(students.reduce((sum, s) => sum + (s.presenca_geral || 0), 0) / students.length)
-          : 0;
-        
-        const aproveitamento = students.length > 0
-          ? Math.round(students.reduce((sum, s) => sum + (s.aproveitamento || 0), 0) / students.length)
-          : 0;
-
-        setStats({
-          totalAlunos,
-          totalCursos,
-          turmasAtivas,
-          proximasFormaturas,
-          presencaMedia,
-          aproveitamento
-        });
+        const data = await statisticsService.getAdminStats();
+        setStats(data);
       } catch (error) {
         console.error('Erro ao carregar estatísticas:', error);
       } finally {
@@ -86,15 +62,17 @@ const AdminStatusCards = () => {
           </div>
           <div>
             <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats.totalAlunos}</p>
-            <p className="text-gray-500 text-xs sm:text-sm">Estudantes matriculados</p>
+            <p className="text-gray-500 text-xs sm:text-sm">Alunos matriculados</p>
           </div>
         </div>
       </div>
 
       <div className="card bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6">
         <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h3 className="text-xs sm:text-sm font-semibold text-gray-500">CURSOS</h3>
-          <div className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">{stats.turmasAtivas} Ativas</div>
+          <h3 className="text-xs sm:text-sm font-semibold text-gray-500">TURMAS</h3>
+          <div className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">
+            {stats.turmasAtivas} Ativas
+          </div>
         </div>
         <div className="flex items-center">
           <div className="p-2 sm:p-3 bg-green-100 rounded-full mr-2 sm:mr-3 md:mr-4 flex-shrink-0">
@@ -143,18 +121,20 @@ const AdminStatusCards = () => {
 
       <div className="card bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6">
         <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h3 className="text-xs sm:text-sm font-semibold text-gray-500">APROVEITAMENTO</h3>
-          <div className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded-full">{stats.proximasFormaturas} Formandos</div>
+          <h3 className="text-xs sm:text-sm font-semibold text-gray-500">ANIVERSÁRIOS</h3>
+          <div className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded-full">
+            {stats.aniversariantes} Este mês
+          </div>
         </div>
         <div className="flex items-center">
           <div className="p-2 sm:p-3 bg-purple-100 rounded-full mr-2 sm:mr-3 md:mr-4 flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0A2.704 2.704 0 004.5 16M12 2v13m0 0l3-3m-3 3l-3-3"></path>
             </svg>
           </div>
           <div>
-            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats.aproveitamento}%</p>
-            <p className="text-gray-500 text-xs sm:text-sm">Média geral</p>
+            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">{stats.proximasFormaturas}</p>
+            <p className="text-gray-500 text-xs sm:text-sm">Próximas formaturas</p>
           </div>
         </div>
       </div>

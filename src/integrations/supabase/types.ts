@@ -319,6 +319,7 @@ export type Database = {
       }
       presencas: {
         Row: {
+          aula_concluida: boolean | null
           course_aula_id: string
           created_at: string | null
           data_presenca: string | null
@@ -329,6 +330,7 @@ export type Database = {
           student_id: string
         }
         Insert: {
+          aula_concluida?: boolean | null
           course_aula_id: string
           created_at?: string | null
           data_presenca?: string | null
@@ -339,6 +341,7 @@ export type Database = {
           student_id: string
         }
         Update: {
+          aula_concluida?: boolean | null
           course_aula_id?: string
           created_at?: string | null
           data_presenca?: string | null
@@ -354,6 +357,13 @@ export type Database = {
             columns: ["course_aula_id"]
             isOneToOne: false
             referencedRelation: "course_aulas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presencas_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "aniversariantes_mes"
             referencedColumns: ["id"]
           },
           {
@@ -419,6 +429,7 @@ export type Database = {
           endereco_numero: string | null
           endereco_rua: string | null
           id: string
+          inscricao_automatica: boolean | null
           observacoes: string | null
           presenca_geral: number | null
           profile_id: string
@@ -441,6 +452,7 @@ export type Database = {
           endereco_numero?: string | null
           endereco_rua?: string | null
           id?: string
+          inscricao_automatica?: boolean | null
           observacoes?: string | null
           presenca_geral?: number | null
           profile_id: string
@@ -463,6 +475,7 @@ export type Database = {
           endereco_numero?: string | null
           endereco_rua?: string | null
           id?: string
+          inscricao_automatica?: boolean | null
           observacoes?: string | null
           presenca_geral?: number | null
           profile_id?: string
@@ -550,9 +563,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      aniversariantes_mes: {
+        Row: {
+          data_nascimento: string | null
+          dia_aniversario: number | null
+          id: string | null
+          nome: string | null
+          turma: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      calcular_progresso_aluno: {
+        Args: { aluno_id: string }
+        Returns: number
+      }
       get_student_turma_id: {
         Args: { user_id: string }
         Returns: string
