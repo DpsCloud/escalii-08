@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,17 +29,17 @@ export const CourseForm = ({ onClose, editingCourse }: CourseFormProps) => {
   const form = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
     defaultValues: editingCourse ? {
-      tipo: editingCourse.tipo,
-      ano: editingCourse.ano,
-      periodo: editingCourse.periodo,
-      turmaCustomizada: editingCourse.turma !== gerarTurma(editingCourse.ano, editingCourse.periodo) ? editingCourse.turma : undefined,
+      tipo: editingCourse.tipo as TipoCurso,
+      ano: editingCourse.ano as AnoDisponivel,
+      periodo: editingCourse.periodo as PeriodoDisponivel,
+      turmaCustomizada: editingCourse.turma !== gerarTurma(editingCourse.ano as AnoDisponivel, editingCourse.periodo as PeriodoDisponivel) ? editingCourse.turma : undefined,
       dataInicio: editingCourse.dataInicio,
       dataFim: editingCourse.dataFim,
       totalAulas: editingCourse.totalAulas,
       maxAlunos: editingCourse.maxAlunos,
       status: editingCourse.status,
       diasSemana: editingCourse.diasSemana as DiaSemana[],
-      aulasSelecionadas: editingCourse.aulasSelecionadas
+      aulasSelecionadas: editingCourse.aulasSelecionadas || []
     } : {
       tipo: 'capacitacao' as TipoCurso,
       ano: '2025' as AnoDisponivel,

@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Eye, Edit, Trash2, Plus, Search, Users, Calendar, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useCourseStore } from '@/stores/useCourseStore';
-import { CourseForm } from '@/components/CourseForm';
+import { CourseFormExtended } from '@/components/CourseFormExtended';
 import { CourseDetailsModal } from '@/components/CourseDetailsModal';
 import { toast } from '@/components/ui/use-toast';
 
@@ -159,7 +159,7 @@ const Cursos = () => {
                     >
                       <h3 className="text-lg font-semibold text-gray-800 mb-1">{course.nome}</h3>
                     </button>
-                    <p className="text-sm text-gray-600 mb-2">Turma: {course.turma}</p>
+                    <p className="text-sm text-gray-600 mb-2">Turma: {course.turma || `${course.ano}.${course.periodo}`}</p>
                     <div className="flex gap-2 mb-2">
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${getStatusColor(course.status)}`}>
                         {getStatusText(course.status)}
@@ -280,7 +280,7 @@ const Cursos = () => {
       {/* Modal de Formulário */}
       <Dialog open={showCourseForm} onOpenChange={setShowCourseForm}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <CourseForm 
+          <CourseFormExtended 
             onClose={() => setShowCourseForm(false)}
             editingCourse={editingCourse}
           />

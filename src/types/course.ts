@@ -27,7 +27,7 @@ export interface Aula {
   duracao: number;
   videoUrl?: string;
   materiais?: Material[];
-  status: 'ativa' | 'planejada' | 'concluida';
+  status: 'ativa' | 'planejada' | 'concluida' | 'agendada' | 'em_andamento' | 'finalizada' | 'cancelada';
   categoria: string;
   tags: string[];
   createdAt: string;
@@ -83,9 +83,12 @@ export interface Course {
   instructorId?: string;
   createdAt: string;
   updatedAt: string;
-  // Campos computados para compatibilidade
+  // Campos computados para compatibilidade com UI
   alunosInscritos?: number;
   turmas?: any[];
+  // Campo para interface estendida
+  turma?: string;
+  aulasSelecionadas?: string[];
 }
 
 export function gerarNomeCurso(tipo: TipoCurso, turma: string): string {

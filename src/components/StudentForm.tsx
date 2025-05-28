@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -66,6 +65,7 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
     try {
       const studentData: Student = {
         id: editingStudent?.id || Date.now().toString(),
+        profileId: editingStudent?.profileId || Date.now().toString(),
         nome: data.nome,
         cpf: data.cpf,
         email: data.email,
@@ -80,16 +80,21 @@ export const StudentForm = ({ onClose, editingStudent }: StudentFormProps) => {
           estado: data.endereco.estado || ''
         } : undefined,
         curso: selectedCourse === 'none' ? undefined : selectedCourse,
-        turma: editingStudent?.turma,
+        turmaId: editingStudent?.turmaId,
         progresso: editingStudent?.progresso || 0,
         status: data.status,
-        foto: editingStudent?.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nome)}&background=3b82f6&color=fff`,
         dataMatricula: editingStudent?.dataMatricula || new Date().toISOString().split('T')[0],
         presencaGeral: editingStudent?.presencaGeral || 0,
         aulasAssistidas: editingStudent?.aulasAssistidas || 0,
         aproveitamento: editingStudent?.aproveitamento || 0,
         certificadoDisponivel: editingStudent?.certificadoDisponivel || false,
-        observacoes: data.observacoes
+        observacoes: data.observacoes,
+        inscricaoAutomatica: editingStudent?.inscricaoAutomatica || true,
+        createdAt: editingStudent?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        // Campos computados para compatibilidade
+        foto: editingStudent?.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nome)}&background=3b82f6&color=fff`,
+        turma: editingStudent?.turma
       };
 
       if (editingStudent) {
