@@ -72,7 +72,7 @@ export const mapCourseToSupabase = (course: Course): SupabaseCourseInsert => {
     carga_horaria: course.cargaHoraria,
     total_aulas: course.totalAulas,
     status: course.status,
-    instrutor: course.instrutor,
+    instrutor: undefined, // Course type doesn't have instrutor
     aulas_selecionadas: course.aulasSelecionadas
   };
 };
@@ -82,49 +82,71 @@ export const mapSupabaseToCourse = (supabaseCourse: SupabaseCourse): Course => {
     id: supabaseCourse.id,
     nome: supabaseCourse.nome,
     descricao: supabaseCourse.descricao || '',
+    tipo: 'capacitacao', // Default value since Supabase doesn't have this field
+    ano: '2025', // Default value since Supabase doesn't have this field
+    periodo: '1', // Default value since Supabase doesn't have this field
+    turma: '', // Default value since Supabase doesn't have this field
     dataInicio: supabaseCourse.data_inicio,
     dataFim: supabaseCourse.data_fim,
-    diasSemana: supabaseCourse.dias_semana,
+    diasSemana: supabaseCourse.dias_semana as any, // Type assertion for compatibility
     cargaHoraria: supabaseCourse.carga_horaria,
     totalAulas: supabaseCourse.total_aulas,
+    maxAlunos: 30, // Default value since Supabase doesn't have this field
     status: supabaseCourse.status,
-    instrutor: supabaseCourse.instrutor,
-    aulasSelecionadas: supabaseCourse.aulas_selecionadas
+    inscricoesAbertas: true, // Default value since Supabase doesn't have this field
+    alunosInscritos: 0, // Default value since Supabase doesn't have this field
+    aulasSelecionadas: supabaseCourse.aulas_selecionadas,
+    turmas: [], // Default value since Supabase doesn't have this field
+    createdAt: supabaseCourse.created_at || new Date().toISOString(),
+    updatedAt: supabaseCourse.updated_at || new Date().toISOString()
   };
 };
 
 // Mappers para Aula
 export const mapAulaToSupabase = (aula: Aula): SupabaseAulaInsert => {
+  // Map status from Aula to Supabase format
+  const statusMap: Record<string, 'agendada' | 'em_andamento' | 'finalizada' | 'cancelada'> = {
+    'planejada': 'agendada',
+    'ativa': 'em_andamento',
+    'concluida': 'finalizada'
+  };
+
   return {
     titulo: aula.titulo,
     descricao: aula.descricao,
-    data: aula.data,
-    horario_inicio: aula.horarioInicio,
-    horario_fim: aula.horarioFim,
+    data: new Date().toISOString().split('T')[0], // Default to today since Aula doesn't have data
+    horario_inicio: '09:00', // Default value since Aula doesn't have horarioInicio
+    horario_fim: '10:00', // Default value since Aula doesn't have horarioFim
     duracao: aula.duracao,
-    status: aula.status,
-    instrutor: aula.instrutor,
-    categoria: aula.categoria,
-    material_url: aula.materialUrl,
+    status: statusMap[aula.status] || 'agendada',
+    instrutor: undefined, // Aula type doesn't have instrutor
+    categoria: aula.categoria || 'geral',
+    material_url: undefined, // Aula type doesn't have materialUrl
     video_url: aula.videoUrl,
-    observacoes: aula.observacoes
+    observacoes: undefined // Aula type doesn't have observacoes
   };
 };
 
 export const mapSupabaseToAula = (supabaseAula: SupabaseAula): Aula => {
+  // Map status from Supabase to Aula format
+  const statusMap: Record<string, 'planejada' | 'ativa' | 'concluida'> = {
+    'agendada': 'planejada',
+    'em_andamento': 'ativa',
+    'finalizada': 'concluida',
+    'cancelada': 'concluida' // Map cancelada to concluida as fallback
+  };
+
   return {
     id: supabaseAula.id,
     titulo: supabaseAula.titulo,
     descricao: supabaseAula.descricao || '',
-    data: supabaseAula.data,
-    horarioInicio: supabaseAula.horario_inicio,
-    horarioFim: supabaseAula.horario_fim,
     duracao: supabaseAula.duracao,
-    status: supabaseAula.status,
-    instrutor: supabaseAula.instrutor,
-    categoria: supabaseAula.categoria,
-    materialUrl: supabaseAula.material_url,
     videoUrl: supabaseAula.video_url,
-    observacoes: supabaseAula.observacoes
+    materiais: [], // Default empty array since this is a separate relationship
+    status: statusMap[supabaseAula.status] || 'planejada',
+    categoria: supabaseAula.categoria,
+    tags: [], // Default empty array since Supabase doesn't have this field
+    createdAt: supabaseAula.created_at || new Date().toISOString(),
+    updatedAt: supabaseAula.updated_at || new Date().toISOString()
   };
 };
