@@ -1,22 +1,13 @@
+
 import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { materialsService } from '@/services/supabaseServices';
+import { mapSupabaseMaterialToMaterial } from '@/utils/supabaseMappers';
+import { Material } from '@/types/course';
 import { FileText, Download, Eye, Calendar } from 'lucide-react';
-
-interface Material {
-  id: string;
-  nome: string;
-  tipo: string;
-  tamanho_arquivo: number;
-  created_at: string;
-  url: string;
-  aulas?: {
-    titulo: string;
-  };
-}
 
 const Materiais = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,7 +21,8 @@ const Materiais = () => {
     const fetchMateriais = async () => {
       try {
         const data = await materialsService.getAllMaterials();
-        setMateriais(data);
+        const mappedMateriais = data.map(mapSupabaseMaterialToMaterial);
+        setMateriais(mappedMateriais);
       } catch (error) {
         console.error('Erro ao carregar materiais:', error);
       } finally {
@@ -45,7 +37,7 @@ const Materiais = () => {
     ? materiais 
     : materiais.filter(material => material.tipo === filtroTipo);
 
-  const formatFileSize = (bytes: number) => {
+  const formatFileSize = (bytes?: number) => {
     if (!bytes || bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -57,8 +49,8 @@ const Materiais = () => {
     switch (tipo) {
       case 'pdf': return 'text-red-600 bg-red-100';
       case 'video': return 'text-purple-600 bg-purple-100';
-      case 'document': return 'text-blue-600 bg-blue-100';
-      case 'image': return 'text-green-600 bg-green-100';
+      case 'documento': return 'text-blue-600 bg-blue-100';
+      case 'imagem': return 'text-green-600 bg-green-100';
       default: return 'text-gray-600 bg-gray-100';
     }
   };
@@ -142,8 +134,8 @@ const Materiais = () => {
                 { value: 'todos', label: 'Todos' },
                 { value: 'pdf', label: 'PDFs' },
                 { value: 'video', label: 'Vídeos' },
-                { value: 'document', label: 'Documentos' },
-                { value: 'image', label: 'Imagens' }
+                { value: 'documento', label: 'Documentos' },
+                { value: 'imagem', label: 'Imagens' }
               ].map((filtro) => (
                 <button
                   key={filtro.value}
@@ -184,16 +176,13 @@ const Materiais = () => {
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-800">{material.nome}</h4>
                       <div className="flex flex-wrap gap-2 text-xs text-gray-500 mt-1">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          <span>{new Date(material.created_at).toLocaleDateString('pt-BR')}</span>
-                        </div>
+                        <span>{formatFileSize(material.tamanhoArquivo)}</span>
                         <span>•</span>
-                        <span>{formatFileSize(material.tamanho_arquivo)}</span>
-                        {material.aulas && (
+                        <span className="capitalize">{material.tipo}</span>
+                        {material.descricao && (
                           <>
                             <span>•</span>
-                            <span className="text-blue-600">{material.aulas.titulo}</span>
+                            <span className="text-blue-600">{material.descricao}</span>
                           </>
                         )}
                       </div>

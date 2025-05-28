@@ -11,24 +11,31 @@ export type DiaSemana = typeof DIAS_SEMANA[number];
 export interface Material {
   id: string;
   nome: string;
-  tipo: 'pdf' | 'video' | 'link' | 'documento';
+  tipo: 'pdf' | 'video' | 'link' | 'documento' | 'imagem';
   url: string;
   descricao?: string;
   aulaId: string;
+  tamanhoArquivo?: number;
+  publico?: boolean;
+  ordem?: number;
 }
 
 export interface Aula {
   id: string;
   titulo: string;
-  descricao: string;
+  descricao?: string;
   duracao: number;
   videoUrl?: string;
   materiais?: Material[];
-  status: 'planejada' | 'ativa' | 'concluida';
-  categoria?: string;
+  status: 'planejada' | 'ativa' | 'concluida' | 'agendada' | 'em_andamento' | 'finalizada' | 'cancelada';
+  categoria: string;
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  objetivos?: string[];
+  prerequisitos?: string[];
+  conteudoTexto?: string;
+  nivelDificuldade?: number;
 }
 
 export interface CursoAula {
@@ -36,7 +43,9 @@ export interface CursoAula {
   cursoId: string;
   aulaId: string;
   ordem: number;
-  dataAula: string;
+  dataAula?: string;
+  horarioInicio?: string;
+  horarioFim?: string;
   obrigatoria: boolean;
   createdAt: string;
 }
@@ -45,25 +54,24 @@ export interface Turma {
   id: string;
   nome: string;
   cursoId: string;
-  status: string;
-  alunos: number;
-  maxAlunos: number;
+  status: 'ativo' | 'inativo' | 'planejado' | 'finalizado' | 'cancelado';
   dataInicio: string;
   dataFim: string;
-  professorId: string;
-  professorNome: string;
-  aulas: number;
-  maxAulas: number;
+  horarioInicio?: string;
+  horarioFim?: string;
+  maxAlunos: number;
+  instructorId?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Course {
   id: string;
   nome: string;
-  descricao: string;
-  tipo: TipoCurso;
-  ano: AnoDisponivel;
-  periodo: PeriodoDisponivel;
-  turma: string;
+  descricao?: string;
+  tipo: string;
+  ano: string;
+  periodo: string;
   dataInicio: string;
   dataFim: string;
   totalAulas: number;
@@ -71,10 +79,8 @@ export interface Course {
   maxAlunos: number;
   status: 'planejado' | 'ativo' | 'finalizado' | 'cancelado';
   inscricoesAbertas: boolean;
-  alunosInscritos: number;
-  diasSemana: DiaSemana[];
-  aulasSelecionadas: string[];
-  turmas: Turma[];
+  diasSemana: string[];
+  instructorId?: string;
   createdAt: string;
   updatedAt: string;
 }

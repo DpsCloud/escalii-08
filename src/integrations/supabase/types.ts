@@ -174,7 +174,7 @@ export type Database = {
             foreignKeyName: "courses_instructor_id_fkey"
             columns: ["instructor_id"]
             isOneToOne: false
-            referencedRelation: "instructors"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -214,7 +214,7 @@ export type Database = {
           {
             foreignKeyName: "instructors_profile_id_fkey"
             columns: ["profile_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -280,7 +280,7 @@ export type Database = {
           mensagem: string
           metadata: Json | null
           profile_id: string
-          tipo: Database["public"]["Enums"]["notification_type"]
+          tipo: Database["public"]["Enums"]["notification_type"] | null
           titulo: string
         }
         Insert: {
@@ -292,7 +292,7 @@ export type Database = {
           mensagem: string
           metadata?: Json | null
           profile_id: string
-          tipo?: Database["public"]["Enums"]["notification_type"]
+          tipo?: Database["public"]["Enums"]["notification_type"] | null
           titulo: string
         }
         Update: {
@@ -304,7 +304,7 @@ export type Database = {
           mensagem?: string
           metadata?: Json | null
           profile_id?: string
-          tipo?: Database["public"]["Enums"]["notification_type"]
+          tipo?: Database["public"]["Enums"]["notification_type"] | null
           titulo?: string
         }
         Relationships: [
@@ -434,7 +434,7 @@ export type Database = {
           presenca_geral: number | null
           profile_id: string
           progresso: number | null
-          status: Database["public"]["Enums"]["student_status"]
+          status: Database["public"]["Enums"]["student_status"] | null
           turma_id: string | null
           updated_at: string | null
         }
@@ -457,7 +457,7 @@ export type Database = {
           presenca_geral?: number | null
           profile_id: string
           progresso?: number | null
-          status?: Database["public"]["Enums"]["student_status"]
+          status?: Database["public"]["Enums"]["student_status"] | null
           turma_id?: string | null
           updated_at?: string | null
         }
@@ -480,7 +480,7 @@ export type Database = {
           presenca_geral?: number | null
           profile_id?: string
           progresso?: number | null
-          status?: Database["public"]["Enums"]["student_status"]
+          status?: Database["public"]["Enums"]["student_status"] | null
           turma_id?: string | null
           updated_at?: string | null
         }
@@ -488,7 +488,7 @@ export type Database = {
           {
             foreignKeyName: "students_profile_id_fkey"
             columns: ["profile_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -556,7 +556,7 @@ export type Database = {
             foreignKeyName: "turmas_instructor_id_fkey"
             columns: ["instructor_id"]
             isOneToOne: false
-            referencedRelation: "instructors"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -583,10 +583,6 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
-      get_user_role: {
-        Args: { user_id: string }
-        Returns: Database["public"]["Enums"]["user_role"]
-      }
       is_admin: {
         Args: { user_id?: string }
         Returns: boolean
@@ -601,16 +597,22 @@ export type Database = {
       }
     }
     Enums: {
-      aula_status: "agendada" | "em_andamento" | "finalizada" | "cancelada"
-      material_type: "pdf" | "video" | "link" | "documento" | "imagem"
+      aula_status:
+        | "ativa"
+        | "planejada"
+        | "concluida"
+        | "agendada"
+        | "em_andamento"
+        | "finalizada"
+        | "cancelada"
+      material_type: "pdf" | "video" | "documento" | "imagem" | "link"
       notification_type: "info" | "warning" | "success" | "error"
       status_type:
         | "ativo"
         | "inativo"
-        | "pendente"
+        | "planejado"
         | "finalizado"
         | "cancelado"
-        | "planejado"
       student_status: "ativo" | "pendente" | "formado" | "inativo"
       user_role: "admin" | "instructor" | "student"
     }
@@ -728,17 +730,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      aula_status: ["agendada", "em_andamento", "finalizada", "cancelada"],
-      material_type: ["pdf", "video", "link", "documento", "imagem"],
-      notification_type: ["info", "warning", "success", "error"],
-      status_type: [
-        "ativo",
-        "inativo",
-        "pendente",
-        "finalizado",
-        "cancelado",
-        "planejado",
+      aula_status: [
+        "ativa",
+        "planejada",
+        "concluida",
+        "agendada",
+        "em_andamento",
+        "finalizada",
+        "cancelada",
       ],
+      material_type: ["pdf", "video", "documento", "imagem", "link"],
+      notification_type: ["info", "warning", "success", "error"],
+      status_type: ["ativo", "inativo", "planejado", "finalizado", "cancelado"],
       student_status: ["ativo", "pendente", "formado", "inativo"],
       user_role: ["admin", "instructor", "student"],
     },

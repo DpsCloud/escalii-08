@@ -1,6 +1,7 @@
 
 export interface Student {
   id: string;
+  profileId: string;
   nome: string;
   cpf: string;
   telefone: string;
@@ -14,15 +15,16 @@ export interface Student {
     cep?: string;
     estado?: string;
   };
-  curso?: string;
-  turma?: string;
+  turmaId?: string;
   progresso: number;
   status: 'ativo' | 'pendente' | 'formado' | 'inativo';
-  foto?: string;
   dataMatricula: string;
   presencaGeral: number;
   aulasAssistidas: number;
   aproveitamento: number;
   certificadoDisponivel: boolean;
   observacoes?: string;
+  inscricaoAutomatica: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
