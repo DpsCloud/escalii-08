@@ -3,17 +3,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Search, Filter } from 'lucide-react';
-import { useAulaStore } from '@/stores/useAulaStore';
 
-export const AulaFilters = () => {
-  const { 
-    searchTerm, 
-    selectedCategory, 
-    aulas,
-    setSearchTerm, 
-    setSelectedCategory 
-  } = useAulaStore();
+interface AulaFiltersProps {
+  searchTerm: string;
+  selectedCategory: string;
+  onSearchChange: (value: string) => void;
+  onCategoryChange: (value: string) => void;
+  aulas?: any[];
+}
 
+export const AulaFilters = ({ 
+  searchTerm, 
+  selectedCategory, 
+  onSearchChange, 
+  onCategoryChange,
+  aulas = []
+}: AulaFiltersProps) => {
   // Extrair categorias únicas das aulas
   const categories = Array.from(new Set(aulas.map(aula => aula.categoria).filter(Boolean)));
 
@@ -29,7 +34,7 @@ export const AulaFilters = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">Categoria</label>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <Select value={selectedCategory} onValueChange={onCategoryChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Todas as categorias" />
               </SelectTrigger>
@@ -50,7 +55,7 @@ export const AulaFilters = () => {
               <Input
                 placeholder="Buscar por título, descrição ou tags..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => onSearchChange(e.target.value)}
                 className="pl-10"
               />
             </div>

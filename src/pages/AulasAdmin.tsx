@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
@@ -25,7 +24,7 @@ const AulasAdmin = () => {
   useEffect(() => {
     const fetchAulas = async () => {
       try {
-        const data = await aulasService.getAll();
+        const data = await aulasService.getAllAulas();
         setAulas(data);
       } catch (error) {
         console.error('Erro ao carregar aulas:', error);
@@ -124,6 +123,7 @@ const AulasAdmin = () => {
               selectedCategory={selectedCategory}
               onSearchChange={setSearchTerm}
               onCategoryChange={setSelectedCategory}
+              aulas={aulas}
             />
 
             <AulaGrid 

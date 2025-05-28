@@ -14,7 +14,7 @@ interface Material {
   tamanho_arquivo: number;
   created_at: string;
   url: string;
-  aula?: {
+  aulas?: {
     titulo: string;
   };
 }
@@ -30,7 +30,7 @@ const Materiais = () => {
   useEffect(() => {
     const fetchMateriais = async () => {
       try {
-        const data = await materialsService.getAll();
+        const data = await materialsService.getAllMaterials();
         setMateriais(data);
       } catch (error) {
         console.error('Erro ao carregar materiais:', error);

@@ -4,7 +4,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
-import { aulasService, coursesService } from '@/services/supabaseServices';
+import { aulasService, turmasService } from '@/services/supabaseServices';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 
 interface AulaData {
@@ -28,8 +28,8 @@ const Aulas = () => {
   useEffect(() => {
     const fetchAulasFromCourse = async () => {
       try {
-        // Buscar turma ativa do aluno
-        const turmaAtiva = await coursesService.getTurmaAtiva();
+        // Buscar turma ativa
+        const turmaAtiva = await turmasService.getTurmaAtiva();
         
         if (turmaAtiva?.course_id) {
           // Buscar aulas do curso

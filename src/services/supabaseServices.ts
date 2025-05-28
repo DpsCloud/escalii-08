@@ -347,6 +347,41 @@ export const aulasService = {
     return data;
   },
 
+  // Buscar aulas por curso
+  async getByCourse(courseId: string) {
+    const { data, error } = await supabase
+      .from('course_aulas')
+      .select(`
+        *,
+        aula:aula_id (
+          id,
+          titulo,
+          descricao,
+          duracao,
+          status,
+          categoria,
+          tags,
+          video_url
+        )
+      `)
+      .eq('course_id', courseId)
+      .order('ordem');
+
+    if (error) throw error;
+    
+    return data.map(item => ({
+      relacao: {
+        id: item.id,
+        ordem: item.ordem,
+        data_aula: item.data_aula,
+        horario_inicio: item.horario_inicio,
+        horario_fim: item.horario_fim,
+        obrigatoria: item.obrigatoria
+      },
+      aula: item.aula
+    }));
+  },
+
   // Buscar aulas por categoria
   async getAulasByCategoria(categoria?: string) {
     let query = supabase
