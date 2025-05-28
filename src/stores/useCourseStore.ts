@@ -1,7 +1,7 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Course } from '@/types/course';
+import { coursesService } from '@/services/supabaseServices';
 
 interface CourseStore {
   courses: Course[];
@@ -11,97 +11,100 @@ interface CourseStore {
   filterType: string;
   
   setCourses: (courses: Course[]) => void;
-  addCourse: (course: Course) => void;
-  updateCourse: (id: string, course: Partial<Course>) => void;
-  deleteCourse: (id: string) => void;
+  addCourse: (course: Course) => Promise<void>;
+  updateCourse: (id: string, course: Partial<Course>) => Promise<void>;
+  deleteCourse: (id: string) => Promise<void>;
   getCourseById: (id: string) => Course | undefined;
-  toggleInscricoes: (id: string) => void;
+  toggleInscricoes: (id: string) => Promise<void>;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setSearchTerm: (term: string) => void;
   setFilterType: (type: string) => void;
   getFilteredCourses: () => Course[];
   getAllCourses: () => Course[];
+  fetchCourses: () => Promise<void>;
 }
-
-// Dados mock atualizados com nova estrutura
-const mockCourses: Course[] = [
-  {
-    id: '1',
-    nome: 'ESCALI Capacitação de Líderes 2025.1',
-    descricao: 'Curso de capacitação para desenvolvimento de líderes cristãos da turma 2025.1.',
-    tipo: 'capacitacao',
-    ano: '2025',
-    periodo: '1',
-    dataInicio: '2025-05-01',
-    dataFim: '2025-07-30',
-    totalAulas: 8,
-    cargaHoraria: 32,
-    status: 'ativo',
-    inscricoesAbertas: true,
-    maxAlunos: 40,
-    alunosInscritos: 35,
-    diasSemana: ['segunda', 'quarta', 'sexta'],
-    turmas: [],
-    createdAt: '2025-01-15T10:00:00Z',
-    updatedAt: '2025-01-20T15:30:00Z'
-  },
-  {
-    id: '2',
-    nome: 'ESCALI Capacitação de Líderes 2025.2',
-    descricao: 'Curso de capacitação para desenvolvimento de líderes cristãos da turma 2025.2.',
-    tipo: 'capacitacao',
-    ano: '2025',
-    periodo: '2',
-    dataInicio: '2025-08-01',
-    dataFim: '2025-10-30',
-    totalAulas: 8,
-    cargaHoraria: 32,
-    status: 'planejado',
-    inscricoesAbertas: false,
-    maxAlunos: 40,
-    alunosInscritos: 0,
-    diasSemana: ['terca', 'quinta'],
-    turmas: [],
-    createdAt: '2025-01-15T10:00:00Z',
-    updatedAt: '2025-01-15T10:00:00Z'
-  }
-];
 
 export const useCourseStore = create<CourseStore>()(
   persist(
     (set, get) => ({
-      courses: mockCourses,
+      courses: [],
       loading: false,
       error: null,
       searchTerm: '',
       filterType: 'all',
       
       setCourses: (courses) => set({ courses }),
-      addCourse: (course) => set((state) => ({ 
-        courses: [...state.courses, course] 
-      })),
-      updateCourse: (id, updatedCourse) => set((state) => ({
-        courses: state.courses.map(course => 
-          course.id === id ? { ...course, ...updatedCourse, updatedAt: new Date().toISOString() } : course
-        )
-      })),
-      deleteCourse: (id) => set((state) => ({
-        courses: state.courses.filter(course => course.id !== id)
-      })),
+      
+      addCourse: async (course) => {
+        try {
+          set({ loading: true });
+          const newCourse = await coursesService.createCourse(course);
+          set((state) => ({ 
+            courses: [...state.courses, newCourse],
+            loading: false 
+          }));
+        } catch (error) {
+          set({ error: 'Erro ao criar curso', loading: false });
+          throw error;
+        }
+      },
+      
+      updateCourse: async (id, updatedCourse) => {
+        try {
+          set({ loading: true });
+          const updated = await coursesService.updateCourse(id, updatedCourse);
+          set((state) => ({
+            courses: state.courses.map(course => 
+              course.id === id ? { ...course, ...updated } : course
+            ),
+            loading: false
+          }));
+        } catch (error) {
+          set({ error: 'Erro ao atualizar curso', loading: false });
+          throw error;
+        }
+      },
+      
+      deleteCourse: async (id) => {
+        try {
+          set({ loading: true });
+          await coursesService.deleteCourse(id);
+          set((state) => ({
+            courses: state.courses.filter(course => course.id !== id),
+            loading: false
+          }));
+        } catch (error) {
+          set({ error: 'Erro ao deletar curso', loading: false });
+          throw error;
+        }
+      },
+      
       getCourseById: (id) => {
         const { courses } = get();
         return courses.find(course => course.id === id);
       },
-      toggleInscricoes: (id) => set((state) => ({
-        courses: state.courses.map(course => 
-          course.id === id ? { 
-            ...course, 
-            inscricoesAbertas: !course.inscricoesAbertas,
-            updatedAt: new Date().toISOString()
-          } : course
-        )
-      })),
+      
+      toggleInscricoes: async (id) => {
+        try {
+          const course = get().courses.find(c => c.id === id);
+          if (!course) throw new Error('Curso não encontrado');
+          
+          const updated = await coursesService.updateCourse(id, {
+            inscricoes_abertas: !course.inscricoesAbertas
+          });
+          
+          set((state) => ({
+            courses: state.courses.map(course => 
+              course.id === id ? { ...course, inscricoesAbertas: !course.inscricoesAbertas } : course
+            )
+          }));
+        } catch (error) {
+          set({ error: 'Erro ao atualizar inscrições' });
+          throw error;
+        }
+      },
+      
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error }),
       setSearchTerm: (searchTerm) => set({ searchTerm }),
@@ -123,6 +126,17 @@ export const useCourseStore = create<CourseStore>()(
       getAllCourses: () => {
         const { courses } = get();
         return courses;
+      },
+
+      fetchCourses: async () => {
+        try {
+          set({ loading: true });
+          const data = await coursesService.getAllCourses();
+          set({ courses: data, loading: false });
+        } catch (error) {
+          set({ error: 'Erro ao carregar cursos', loading: false });
+          throw error;
+        }
       }
     }),
     {
