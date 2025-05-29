@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Student } from '@/types/student';
 import { Course } from '@/types/course';
@@ -38,7 +37,10 @@ export const alunosService = {
         certificadoDisponivel: aluno.certificado_disponivel || false,
         turmaId: aluno.turma_id,
         status: aluno.status || 'pendente',
-        dataMatricula: aluno.data_matricula
+        dataMatricula: aluno.data_matricula,
+        inscricaoAutomatica: aluno.inscricao_automatica || true,
+        createdAt: aluno.created_at || '',
+        updatedAt: aluno.updated_at || ''
       }));
 
       return alunos;
@@ -63,7 +65,8 @@ export const alunosService = {
             certificado_disponivel: student.certificadoDisponivel,
             progresso: student.progresso,
             status: student.status,
-            data_matricula: student.dataMatricula
+            data_matricula: student.dataMatricula,
+            inscricao_automatica: student.inscricaoAutomatica
           }
         ])
         .select()
@@ -90,7 +93,10 @@ export const alunosService = {
         certificadoDisponivel: data.certificado_disponivel,
         turmaId: data.turma_id,
         status: data.status,
-        dataMatricula: data.data_matricula
+        dataMatricula: data.data_matricula,
+        inscricaoAutomatica: data.inscricao_automatica || true,
+        createdAt: data.created_at || '',
+        updatedAt: data.updated_at || ''
       };
 
       return newStudent;
@@ -113,7 +119,8 @@ export const alunosService = {
           aproveitamento: student.aproveitamento,
           certificado_disponivel: student.certificadoDisponivel,
           progresso: student.progresso,
-          status: student.status
+          status: student.status,
+          inscricao_automatica: student.inscricaoAutomatica
         })
         .eq('id', id)
         .select()
@@ -161,26 +168,28 @@ export const coursesService = {
         throw error;
       }
 
-      // Map Supabase data to Course type
-      const courses: Course[] = data.map(course => ({
-        id: course.id,
-        nome: course.nome,
-        descricao: course.descricao,
-        tipo: course.tipo,
-        ano: course.ano,
-        periodo: course.periodo,
-        dataInicio: course.data_inicio,
-        dataFim: course.data_fim,
-        totalAulas: course.total_aulas,
-        inscricoesAbertas: course.inscricoes_abertas,
-        cargaHoraria: course.carga_horaria,
-        maxAlunos: course.max_alunos,
-        status: course.status,
-        diasSemana: course.dias_semana || [],
-        instructorId: course.instructor_id,
-        createdAt: course.created_at,
-        updatedAt: course.updated_at
-      }));
+      // Map Supabase data to Course type, filtering out 'inativo' status
+      const courses: Course[] = data
+        .filter(course => course.status !== 'inativo')
+        .map(course => ({
+          id: course.id,
+          nome: course.nome,
+          descricao: course.descricao,
+          tipo: course.tipo,
+          ano: course.ano,
+          periodo: course.periodo,
+          dataInicio: course.data_inicio,
+          dataFim: course.data_fim,
+          totalAulas: course.total_aulas,
+          inscricoesAbertas: course.inscricoes_abertas,
+          cargaHoraria: course.carga_horaria,
+          maxAlunos: course.max_alunos,
+          status: course.status as 'ativo' | 'planejado' | 'finalizado' | 'cancelado',
+          diasSemana: course.dias_semana || [],
+          instructorId: course.instructor_id,
+          createdAt: course.created_at,
+          updatedAt: course.updated_at
+        }));
 
       return courses;
     } catch (error) {
@@ -233,7 +242,7 @@ export const coursesService = {
         inscricoesAbertas: data.inscricoes_abertas,
         cargaHoraria: data.carga_horaria,
         maxAlunos: data.max_alunos,
-        status: data.status,
+        status: data.status as 'ativo' | 'planejado' | 'finalizado' | 'cancelado',
         diasSemana: data.dias_semana || [],
         instructorId: data.instructor_id,
         createdAt: data.created_at,
@@ -276,7 +285,25 @@ export const coursesService = {
         throw error;
       }
 
-      return data;
+      return {
+        id: data.id,
+        nome: data.nome,
+        descricao: data.descricao,
+        tipo: data.tipo,
+        ano: data.ano,
+        periodo: data.periodo,
+        dataInicio: data.data_inicio,
+        dataFim: data.data_fim,
+        totalAulas: data.total_aulas,
+        inscricoesAbertas: data.inscricoes_abertas,
+        cargaHoraria: data.carga_horaria,
+        maxAlunos: data.max_alunos,
+        status: data.status as 'ativo' | 'planejado' | 'finalizado' | 'cancelado',
+        diasSemana: data.dias_semana || [],
+        instructorId: data.instructor_id,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      };
     } catch (error) {
       console.error("Erro ao atualizar curso:", error);
       throw error;

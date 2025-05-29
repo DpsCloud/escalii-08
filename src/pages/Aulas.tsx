@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
@@ -36,14 +35,14 @@ const Aulas = () => {
           const aulasData = await aulasService.getByCourse(turmaAtiva.course_id);
           
           // Mapear para o formato esperado
-          const aulasFormatadas = aulasData.map((item, index) => ({
-            id: item.aula.id,
-            titulo: item.aula.titulo,
-            descricao: item.aula.descricao || '',
-            duracao: item.aula.duracao,
-            status: item.aula.status as 'ativa' | 'planejada' | 'concluida',
-            data_aula: item.relacao.data_aula || '',
-            ordem: item.relacao.ordem
+          const aulasFormatadas = aulasData.map((aula, index) => ({
+            id: aula.id,
+            titulo: aula.titulo,
+            descricao: aula.descricao || '',
+            duracao: aula.duracao,
+            status: aula.status as 'ativa' | 'planejada' | 'concluida',
+            data_aula: aula.createdAt || '',
+            ordem: index + 1
           }));
 
           setAulas(aulasFormatadas.sort((a, b) => a.ordem - b.ordem));

@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Course } from '@/types/course';
@@ -91,7 +92,7 @@ export const useCourseStore = create<CourseStore>()(
           if (!course) throw new Error('Curso não encontrado');
           
           const updated = await coursesService.updateCourse(id, {
-            inscricoes_abertas: !course.inscricoesAbertas
+            inscricoesAbertas: !course.inscricoesAbertas
           });
           
           set((state) => ({

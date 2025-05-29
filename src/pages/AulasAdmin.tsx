@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
@@ -10,7 +9,6 @@ import { AulaFilters } from '@/components/AulaFilters';
 import { AulaGrid } from '@/components/AulaGrid';
 import { Plus } from 'lucide-react';
 import { aulasService } from '@/services/supabaseServices';
-import { mapSupabaseAulaToAula } from '@/utils/supabaseMappers';
 import { Aula } from '@/types/course';
 
 const AulasAdmin = () => {
@@ -27,9 +25,7 @@ const AulasAdmin = () => {
     const fetchAulas = async () => {
       try {
         const data = await aulasService.getAllAulas();
-        // Map Supabase data to Aula type
-        const mappedAulas = data.map(mapSupabaseAulaToAula);
-        setAulas(mappedAulas);
+        setAulas(data);
       } catch (error) {
         console.error('Erro ao carregar aulas:', error);
       } finally {
