@@ -20,5 +20,24 @@ export const materialsService = {
       console.error('Erro ao buscar materiais recentes:', error);
       return [];
     }
+  },
+
+  async getAllMaterials() {
+    try {
+      const { data: materials } = await supabase
+        .from('materials')
+        .select(`
+          *,
+          aulas:aula_id (
+            titulo
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      return materials || [];
+    } catch (error) {
+      console.error('Erro ao buscar todos os materiais:', error);
+      return [];
+    }
   }
 };

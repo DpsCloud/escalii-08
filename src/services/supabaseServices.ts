@@ -1,14 +1,21 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { Student, SupabaseStudent } from '@/types/student';
-import { Course, SupabaseCourse } from '@/types/course';
-import { Aula, SupabaseAula } from '@/types/course';
+import { Student } from '@/types/student';
+import { Course } from '@/types/course';
+import { Aula } from '@/types/course';
 
 export const alunosService = {
   async getAllAlunos(): Promise<Student[]> {
     try {
       const { data, error } = await supabase
         .from('students')
-        .select('*');
+        .select(`
+          *,
+          profiles:profile_id (
+            nome,
+            telefone
+          )
+        `);
 
       if (error) {
         console.error("Erro ao buscar alunos:", error);
@@ -18,14 +25,20 @@ export const alunosService = {
       // Map Supabase data to Student type
       const alunos: Student[] = data.map(aluno => ({
         id: aluno.id,
-        nome: aluno.nome,
-        email: aluno.email,
-        telefone: aluno.telefone,
-        cursoId: aluno.curso_id,
-        presencaGeral: aluno.presenca_geral,
-        aulasAssistidas: aluno.aulas_assistidas,
-        aproveitamento: aluno.aproveitamento,
-        certificadoDisponivel: aluno.certificado_disponivel,
+        nome: aluno.profiles?.nome || '',
+        email: '', // Email vem do auth, não do profiles
+        telefone: aluno.profiles?.telefone || '',
+        profileId: aluno.profile_id,
+        cpf: '',
+        dataNascimento: aluno.data_nascimento,
+        progresso: aluno.progresso || 0,
+        presencaGeral: aluno.presenca_geral || 0,
+        aulasAssistidas: aluno.aulas_assistidas || 0,
+        aproveitamento: aluno.aproveitamento || 0,
+        certificadoDisponivel: aluno.certificado_disponivel || false,
+        turmaId: aluno.turma_id,
+        status: aluno.status || 'pendente',
+        dataMatricula: aluno.data_matricula
       }));
 
       return alunos;
@@ -41,14 +54,16 @@ export const alunosService = {
         .from('students')
         .insert([
           {
-            nome: student.nome,
-            email: student.email,
-            telefone: student.telefone,
-            curso_id: student.cursoId,
+            profile_id: student.profileId,
+            data_nascimento: student.dataNascimento,
+            turma_id: student.turmaId,
             presenca_geral: student.presencaGeral,
             aulas_assistidas: student.aulasAssistidas,
             aproveitamento: student.aproveitamento,
             certificado_disponivel: student.certificadoDisponivel,
+            progresso: student.progresso,
+            status: student.status,
+            data_matricula: student.dataMatricula
           }
         ])
         .select()
@@ -59,17 +74,23 @@ export const alunosService = {
         throw error;
       }
 
-      // Map Supabase data to Student type
+      // Map back to Student type
       const newStudent: Student = {
         id: data.id,
-        nome: data.nome,
-        email: data.email,
-        telefone: data.telefone,
-        cursoId: data.curso_id,
+        nome: '',
+        email: '',
+        telefone: '',
+        profileId: data.profile_id,
+        cpf: '',
+        dataNascimento: data.data_nascimento,
+        progresso: data.progresso,
         presencaGeral: data.presenca_geral,
         aulasAssistidas: data.aulas_assistidas,
         aproveitamento: data.aproveitamento,
         certificadoDisponivel: data.certificado_disponivel,
+        turmaId: data.turma_id,
+        status: data.status,
+        dataMatricula: data.data_matricula
       };
 
       return newStudent;
@@ -84,14 +105,15 @@ export const alunosService = {
       const { data, error } = await supabase
         .from('students')
         .update({
-          nome: student.nome,
-          email: student.email,
-          telefone: student.telefone,
-          curso_id: student.cursoId,
+          profile_id: student.profileId,
+          data_nascimento: student.dataNascimento,
+          turma_id: student.turmaId,
           presenca_geral: student.presencaGeral,
           aulas_assistidas: student.aulasAssistidas,
           aproveitamento: student.aproveitamento,
           certificado_disponivel: student.certificadoDisponivel,
+          progresso: student.progresso,
+          status: student.status
         })
         .eq('id', id)
         .select()
@@ -102,7 +124,6 @@ export const alunosService = {
         throw error;
       }
 
-      // Directly return the updated data
       return data;
     } catch (error) {
       console.error("Erro ao atualizar aluno:", error);
@@ -152,6 +173,13 @@ export const coursesService = {
         dataFim: course.data_fim,
         totalAulas: course.total_aulas,
         inscricoesAbertas: course.inscricoes_abertas,
+        cargaHoraria: course.carga_horaria,
+        maxAlunos: course.max_alunos,
+        status: course.status,
+        diasSemana: course.dias_semana || [],
+        instructorId: course.instructor_id,
+        createdAt: course.created_at,
+        updatedAt: course.updated_at
       }));
 
       return courses;
@@ -176,6 +204,11 @@ export const coursesService = {
             data_fim: course.dataFim,
             total_aulas: course.totalAulas,
             inscricoes_abertas: course.inscricoesAbertas,
+            carga_horaria: course.cargaHoraria,
+            max_alunos: course.maxAlunos,
+            status: course.status,
+            dias_semana: course.diasSemana,
+            instructor_id: course.instructorId
           }
         ])
         .select()
@@ -198,6 +231,13 @@ export const coursesService = {
         dataFim: data.data_fim,
         totalAulas: data.total_aulas,
         inscricoesAbertas: data.inscricoes_abertas,
+        cargaHoraria: data.carga_horaria,
+        maxAlunos: data.max_alunos,
+        status: data.status,
+        diasSemana: data.dias_semana || [],
+        instructorId: data.instructor_id,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
       };
 
       return newCourse;
@@ -221,6 +261,11 @@ export const coursesService = {
           data_fim: course.dataFim,
           total_aulas: course.totalAulas,
           inscricoes_abertas: course.inscricoesAbertas,
+          carga_horaria: course.cargaHoraria,
+          max_alunos: course.maxAlunos,
+          status: course.status,
+          dias_semana: course.diasSemana,
+          instructor_id: course.instructorId
         })
         .eq('id', id)
         .select()
@@ -231,7 +276,6 @@ export const coursesService = {
         throw error;
       }
 
-      // Directly return the updated data
       return data;
     } catch (error) {
       console.error("Erro ao atualizar curso:", error);
@@ -258,7 +302,7 @@ export const coursesService = {
 };
 
 export const aulasService = {
-  async getAllAulas(): Promise<SupabaseAula[]> {
+  async getAllAulas(): Promise<Aula[]> {
     try {
       const { data, error } = await supabase
         .from('aulas')
@@ -269,9 +313,64 @@ export const aulasService = {
         throw error;
       }
 
-      return data || [];
+      // Map Supabase data to Aula type
+      const aulas: Aula[] = data.map(aula => ({
+        id: aula.id,
+        titulo: aula.titulo,
+        descricao: aula.descricao,
+        categoria: aula.categoria,
+        videoUrl: aula.video_url,
+        tags: aula.tags || [],
+        duracao: aula.duracao,
+        status: aula.status,
+        conteudoTexto: aula.conteudo_texto,
+        prerequisitos: aula.prerequisitos || [],
+        objetivos: aula.objetivos || [],
+        nivelDificuldade: aula.nivel_dificuldade,
+        createdAt: aula.created_at,
+        updatedAt: aula.updated_at
+      }));
+
+      return aulas;
     } catch (error) {
       console.error("Erro ao buscar aulas:", error);
+      throw error;
+    }
+  },
+
+  async getByCourse(courseId: string): Promise<Aula[]> {
+    try {
+      const { data, error } = await supabase
+        .from('course_aulas')
+        .select(`
+          aulas:aula_id (*)
+        `)
+        .eq('course_id', courseId);
+
+      if (error) {
+        console.error("Erro ao buscar aulas do curso:", error);
+        throw error;
+      }
+
+      // Map and return aulas
+      return data.map(item => ({
+        id: item.aulas.id,
+        titulo: item.aulas.titulo,
+        descricao: item.aulas.descricao,
+        categoria: item.aulas.categoria,
+        videoUrl: item.aulas.video_url,
+        tags: item.aulas.tags || [],
+        duracao: item.aulas.duracao,
+        status: item.aulas.status,
+        conteudoTexto: item.aulas.conteudo_texto,
+        prerequisitos: item.aulas.prerequisitos || [],
+        objetivos: item.aulas.objetivos || [],
+        nivelDificuldade: item.aulas.nivel_dificuldade,
+        createdAt: item.aulas.created_at,
+        updatedAt: item.aulas.updated_at
+      }));
+    } catch (error) {
+      console.error("Erro ao buscar aulas do curso:", error);
       throw error;
     }
   },
@@ -287,6 +386,12 @@ export const aulasService = {
             categoria: aula.categoria,
             video_url: aula.videoUrl,
             tags: aula.tags,
+            duracao: aula.duracao,
+            status: aula.status,
+            conteudo_texto: aula.conteudoTexto,
+            prerequisitos: aula.prerequisitos,
+            objetivos: aula.objetivos,
+            nivel_dificuldade: aula.nivelDificuldade
           }
         ])
         .select()
@@ -304,7 +409,15 @@ export const aulasService = {
         descricao: data.descricao,
         categoria: data.categoria,
         videoUrl: data.video_url,
-        tags: data.tags,
+        tags: data.tags || [],
+        duracao: data.duracao,
+        status: data.status,
+        conteudoTexto: data.conteudo_texto,
+        prerequisitos: data.prerequisitos || [],
+        objetivos: data.objetivos || [],
+        nivelDificuldade: data.nivel_dificuldade,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
       };
 
       return newAula;
@@ -324,6 +437,12 @@ export const aulasService = {
           categoria: aula.categoria,
           video_url: aula.videoUrl,
           tags: aula.tags,
+          duracao: aula.duracao,
+          status: aula.status,
+          conteudo_texto: aula.conteudoTexto,
+          prerequisitos: aula.prerequisitos,
+          objetivos: aula.objetivos,
+          nivel_dificuldade: aula.nivelDificuldade
         })
         .eq('id', id)
         .select()
@@ -334,7 +453,6 @@ export const aulasService = {
         throw error;
       }
 
-      // Directly return the updated data
       return data;
     } catch (error) {
       console.error("Erro ao atualizar aula:", error);
@@ -359,6 +477,10 @@ export const aulasService = {
     }
   }
 };
+
+// Export auth and profiles services
+export { authService } from './authService';
+export { profilesService } from './profilesService';
 
 // Export the new services
 export { statisticsService } from './statisticsService';
