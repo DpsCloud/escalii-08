@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
-import { materialsService } from '@/services/supabaseServices';
+import { materialsService } from '@/services/materialsService';
 import { FileText, Download, Eye, Calendar } from 'lucide-react';
 
 const RecentMaterials = () => {

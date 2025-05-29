@@ -1,5 +1,6 @@
+
 import { useEffect, useState } from 'react';
-import { statisticsService } from '@/services/supabaseServices';
+import { statisticsService } from '@/services/statisticsService';
 
 const AdminStatusCards = () => {
   const [stats, setStats] = useState({

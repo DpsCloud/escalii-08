@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
-import { statisticsService } from '@/services/supabaseServices';
+import { statisticsService } from '@/services/statisticsService';
 
 const StatusCards = () => {
   const { profile } = useAuth();

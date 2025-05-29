@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
-import { turmasService, coursesService } from '@/services/supabaseServices';
+import { turmasService } from '@/services/turmasService';
 import { Calendar, Clock, Users, MapPin } from 'lucide-react';
 
 const UpcomingClasses = () => {
