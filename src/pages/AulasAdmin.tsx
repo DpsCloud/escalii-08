@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
@@ -8,33 +9,32 @@ import { AulaForm } from '@/components/AulaForm';
 import { AulaFilters } from '@/components/AulaFilters';
 import { AulaGrid } from '@/components/AulaGrid';
 import { Plus } from 'lucide-react';
-import { aulasService } from '@/services/supabaseServices';
+import { useAulaStore } from '@/stores/useAulaStore';
 import { Aula } from '@/types/course';
 
 const AulasAdmin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aulaDialogOpen, setAulaDialogOpen] = useState(false);
   const [editingAula, setEditingAula] = useState<Aula | undefined>();
-  const [aulas, setAulas] = useState<Aula[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const isMobile = useIsMobile();
 
-  useEffect(() => {
-    const fetchAulas = async () => {
-      try {
-        const data = await aulasService.getAllAulas();
-        setAulas(data);
-      } catch (error) {
-        console.error('Erro ao carregar aulas:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const {
+    getFilteredAulas,
+    fetchAulas,
+    loading,
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    aulas
+  } = useAulaStore();
 
+  const filteredAulas = getFilteredAulas();
+
+  // Carregar aulas ao montar o componente
+  useEffect(() => {
     fetchAulas();
-  }, []);
+  }, [fetchAulas]);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -49,17 +49,6 @@ const AulasAdmin = () => {
     setAulaDialogOpen(false);
     setEditingAula(undefined);
   };
-
-  const filteredAulas = aulas.filter(aula => {
-    const matchesSearch = searchTerm === '' || 
-      aula.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      aula.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      aula.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesCategory = selectedCategory === 'all' || aula.categoria === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
 
   if (loading) {
     return (

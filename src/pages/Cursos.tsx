@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -30,10 +30,17 @@ const Cursos = () => {
     filterType, 
     setFilterType,
     deleteCourse,
-    toggleInscricoes
+    toggleInscricoes,
+    fetchCourses,
+    loading
   } = useCourseStore();
 
   const courses = getFilteredCourses();
+
+  // Carregar cursos ao montar o componente
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -96,6 +103,27 @@ const Cursos = () => {
     return tipo === 'capacitacao' ? 'Capacitação' : 'Revalidação';
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted flex">
+        <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+        <div className={`flex-1 flex flex-col transition-all duration-300 ${isMobile ? 'w-full' : (sidebarOpen ? 'ml-64' : 'ml-[70px]')}`}>
+          <Header toggleSidebar={toggleSidebar} />
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">
+            <div className="animate-pulse space-y-6">
+              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-64 bg-gray-200 rounded"></div>
+                ))}
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-muted flex">
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
@@ -120,7 +148,6 @@ const Cursos = () => {
             </div>
           </div>
 
-          {/* Filtros */}
           <div className="mb-6">
             <div className="bg-white rounded-xl shadow-sm p-4">
               <div className="flex flex-col sm:flex-row gap-4">
@@ -216,12 +243,12 @@ const Cursos = () => {
                 <div className="mb-4">
                   <div className="flex justify-between text-xs text-gray-500 mb-1">
                     <span>Vagas</span>
-                    <span>{course.alunosInscritos}/{course.maxAlunos}</span>
+                    <span>{course.alunosInscritos || 0}/{course.maxAlunos}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="h-2 rounded-full bg-blue-600"
-                      style={{ width: `${(course.alunosInscritos / course.maxAlunos) * 100}%` }}
+                      style={{ width: `${((course.alunosInscritos || 0) / course.maxAlunos) * 100}%` }}
                     ></div>
                   </div>
                 </div>
@@ -277,7 +304,6 @@ const Cursos = () => {
         </main>
       </div>
 
-      {/* Modal de Formulário */}
       <Dialog open={showCourseForm} onOpenChange={setShowCourseForm}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <CourseFormExtended 
@@ -287,7 +313,6 @@ const Cursos = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Modal de Detalhes */}
       <Dialog open={showCourseDetails} onOpenChange={setShowCourseDetails}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
