@@ -5,9 +5,10 @@ import { useAuth } from "@/contexts/SupabaseAuthContext";
 import { Link } from "react-router-dom";
 import { BookOpen, Users, Calendar, Award, ArrowRight, GraduationCap } from "lucide-react";
 import { AddUserButton } from "@/components/AddUserButton";
+import { CreateUserDialog } from "@/components/CreateUserDialog";
 
 const Index = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isAdmin } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -79,7 +80,12 @@ const Index = () => {
                     <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
-                <AddUserButton />
+                {isAdmin && (
+                  <>
+                    <CreateUserDialog />
+                    <AddUserButton />
+                  </>
+                )}
               </div>
             </div>
           ) : (
@@ -94,7 +100,7 @@ const Index = () => {
                     <ArrowRight className="h-5 w-5" />
                   </Button>
                 </Link>
-                <AddUserButton />
+                <CreateUserDialog />
               </div>
             </div>
           )}

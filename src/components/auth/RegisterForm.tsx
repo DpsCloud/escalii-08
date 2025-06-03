@@ -1,8 +1,9 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface RegisterFormProps {
   onBack: () => void;
@@ -20,6 +21,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onBack }) => {
   });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
 
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, '');
@@ -87,19 +90,30 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onBack }) => {
     setLoading(true);
     
     try {
-      // Aqui seria a chamada para a API de cadastro
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simular delay
-      
+      const result = await signUp(formData.email, formData.senha, {
+        nome: formData.nome,
+        cpf: formData.cpf,
+        telefone: formData.telefone,
+        data_nascimento: formData.dataNascimento,
+        role: 'student'
+      });
+
+      if (result.error) {
+        throw result.error;
+      }
+
       toast({
         title: "Sucesso",
-        description: "Cadastro realizado com sucesso! Faça login para continuar."
+        description: "Cadastro realizado com sucesso! Verifique seu email se necessário."
       });
       
-      onBack();
-    } catch (error) {
+      // Navegar para dashboard após cadastro bem-sucedido
+      navigate('/dashboard');
+    } catch (error: any) {
+      console.error('Erro no cadastro:', error);
       toast({
         title: "Erro",
-        description: "Erro ao realizar cadastro",
+        description: error.message || "Erro ao realizar cadastro",
         variant: "destructive"
       });
     } finally {
